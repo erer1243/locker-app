@@ -2,7 +2,11 @@ to compile this you need:
   python libs:
     kivy
     pygame
+    cython
     jnius
   apt packages:
     openjdk-8-jre
-    openjdk-8-headless
+    openjdk-8-jdk-headless or openjdk-8-jdk
+
+if using a different version of openjdk, you will have to change the second
+line in main.py to the correct java_home path
