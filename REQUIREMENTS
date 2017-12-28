@@ -1,0 +1,8 @@
+to compile this you need:
+  python libs:
+    kivy
+    pygame
+    jnius
+  apt packages:
+    openjdk-8-jre
+    openjdk-8-headless
