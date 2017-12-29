@@ -1,12 +1,19 @@
 to compile this you need:
   python libs:
-    kivy
+    kivy 1.10.0
     pygame
-    cython
+    cython 0.24.1
     jnius
+    python3crystax
   apt packages:
     openjdk-8-jre
     openjdk-8-jdk-headless or openjdk-8-jdk
 
 if using a different version of openjdk, you will have to change the second
 line in main.py to the correct java_home path
+
+configure python3crystax install folder in buildozer.spec
+download here https://www.crystax.net/en/download
+
+see buildozer python3 install for more info
+https://github.com/kivy/buildozer
