@@ -27,7 +27,7 @@ class ErrorGrid(GridLayout):
     def __init__(self, message, **kwargs):
         super().__init__(**kwargs)
         self.cols = 1
-        self.rows = 4
+        self.rows = 3
         self.add_widget(Label(text="The app has encountered an error! Traceback below.", size_hint=(1, .05)))
         self.add_widget(ErrorView(text=message.replace('\\n', '\n')))
         self.add_widget(Button(text="exit", on_release=sys.exit, size_hint=(1, .1)))
