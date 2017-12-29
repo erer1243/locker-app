@@ -23,4 +23,4 @@ class ErrorMain(App):
         return self.grid
 
 if __name__ == "__main__":
-    ErrorMain("Generic error message. You should never see this.").run()
+    ErrorMain("Generic error message. This appears only in debugging, you should never see this.").run()
