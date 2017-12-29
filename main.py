@@ -20,19 +20,26 @@ from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen
 
+def fail(reason, **kwargs):
+    from failurepage import FailureScreen
+    return FailureScreen(reason, **kwargs)
+
 class ScreenDisplayController(ScreenManager):
     pass
 class MainApp(App):
-    def __init__(self, BluetoothSuccess,**kwargs):
+    def __init__(self, paired_devices,**kwargs):
         super().__init__(**kwargs)
-        self.paired_devices = BluetoothSuccess
+        self.paired_devices = paired_devices # get paired devices passed below
 
     def build(self):
+        if not self.paired_devices:
+            return fail("No paired Bluetooth devices!\nPlease pair with the locker in the settings menu and restart the app.")
+
         return Builder.load_file('main.kv')
 
 # when app is run directly
 if __name__ == "__main__":
-    paired_devices = None
+    paired_devices = []
     if java:
         paired_devices = BluetoothAdapter.getDefaultAdapter().getBondedDevices().toArray()
     try:
@@ -43,6 +50,8 @@ if __name__ == "__main__":
 
     try:
         app.run()
+    except SystemExit:
+        sys.exit()
     except:
         app.stop()
         from errorpage import ErrorMain
