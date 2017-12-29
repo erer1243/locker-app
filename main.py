@@ -22,9 +22,14 @@ class MainApp(App):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.stylesheet = '''
-ListView:
-    item_strings: [str(intex) for index in range(100)]        
-
+BoxLayout:
+    id: box
+    Label:
+        text: "0"
+        id: number
+    Button:
+        text: "Add 1 to label"
+        on_release: app.addOneToLabel()
         '''
     def build(self):
         return Builder.load_string(self.stylesheet)
@@ -32,7 +37,14 @@ ListView:
 # when app is run directly
 if __name__ == "__main__":
     try:
-        MainApp().run()
+        app = MainApp()
     except:
+        from errorpage import ErrorMain
+        ErrorMain(str(sys.exc_info())).run()
+
+    try:
+        app.run()
+    except:
+        app.stop()
         from errorpage import ErrorMain
         ErrorMain(str(sys.exc_info())).run()
