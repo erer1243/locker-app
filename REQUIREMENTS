@@ -9,6 +9,8 @@ to compile this you need:
     openjdk-8-jre
     openjdk-8-jdk-headless or openjdk-8-jdk
 
+to install a specific version of a python lib use 'pip3 install module==1.2.3'
+
 if using a different version of openjdk, you will have to change the second
 line in main.py to the correct java_home path
 
