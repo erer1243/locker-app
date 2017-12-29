@@ -1,6 +1,6 @@
-#: import CardTransition kivy.uix.screenmanager.CardTransition
+#: import SlideTransition kivy.uix.screenmanager.SlideTransition
 ScreenDisplayController:
-    transition: CardTransition()
+    transition:
     MainMenu:
     OtherMenu:
 
@@ -9,11 +9,15 @@ ScreenDisplayController:
     Button:
         text: "Example Button"
         font_size: 50
-        on_release: app.root.current = "othermenu"
+        on_release:
+            app.root.transition = SlideTransition(direction='left')
+            app.root.current = "othermenu"
 
 <OtherMenu>:
     name: "othermenu"
     Button:
         text: "Example Button 2"
         font_size: 40
-        on_release: app.root.current = "mainmenu"
+        on_release:
+            app.root.transition = SlideTransition(direction='right')
+            app.root.current = "mainmenu"
