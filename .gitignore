@@ -1,3 +1,5 @@
 .buildozer/
 bin
 log
+__pycache__/
+media/*.kra
