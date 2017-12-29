@@ -1,13 +1,13 @@
 [app]
 
 # (str) Title of your application
-title = My Application
+title = Locker Controller
 
 # (str) Package name
-package.name = myapp
+package.name = locker_controller
 
 # (str) Package domain (needed for android/ios packaging)
-package.domain = org.test
+package.domain = org.lockerman
 
 # (str) Source code where the main.py live
 source.dir = .
@@ -36,7 +36,7 @@ version = 0.1
 
 # (list) Application requirements
 # comma seperated e.g. requirements = sqlite3,kivy
-requirements = kivy
+requirements = kivy,python3crystax,pyjnius
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -103,7 +103,7 @@ fullscreen = 0
 #android.private_storage = True
 
 # (str) Android NDK directory (if empty, it will be automatically downloaded.)
-#android.ndk_path =
+android.ndk_path = ../crystax-ndk
 
 # (str) Android SDK directory (if empty, it will be automatically downloaded.)
 #android.sdk_path =
