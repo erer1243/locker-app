@@ -15,17 +15,26 @@ UUID = autoclass('java.util.UUID')
 import kivy
 kivy.require('1.10.0')
 from kivy.app import App
-from kivy.uix.label import Label
-# from kivy.button import Button
+from kivy.lang import Builder
+
 
 class MainApp(App):
-    def build(self):
-        self.message = Label(text="hello")
-        ERR
-        return self.message
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.stylesheet = '''
+BoxLayout:
+    Label:
+        text: "hello"
+        
 
-try:
-    MainApp().run()
-except:
-    from errorpage import ErrorMain
-    ErrorMain(str(sys.exc_info())).run()
+        '''
+    def build(self):
+        return Builder.load_string(self.stylesheet)
+
+# when app is run directly
+if __name__ == "__main__":
+    try:
+        MainApp().run()
+    except:
+        from errorpage import ErrorMain
+        ErrorMain(str(sys.exc_info())).run()
