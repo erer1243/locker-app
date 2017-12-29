@@ -22,10 +22,8 @@ class MainApp(App):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.stylesheet = '''
-BoxLayout:
-    Label:
-        text: "hello"
-        
+ListView:
+    item_strings: [str(intex) for index in range(100)]        
 
         '''
     def build(self):
