@@ -8,5 +8,5 @@ class FailureScreen(GridLayout):
         super().__init__(**kwargs)
         self.cols = 1
         self.rows = 2
-        self.add_widget(Label(text=message, size_hint=(1, .9)))
+        self.add_widget(Label(text=message, size_hint=(1, .9), text_size=(self.width, None)))
         self.add_widget(Button(text="Exit", on_release=sys.exit))
