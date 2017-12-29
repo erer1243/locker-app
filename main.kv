@@ -1,0 +1,19 @@
+#: import CardTransition kivy.uix.screenmanager.CardTransition
+ScreenDisplayController:
+    transition: CardTransition()
+    MainMenu:
+    OtherMenu:
+
+<MainMenu>:
+    name: "mainmenu"
+    Button:
+        text: "Example Button"
+        font_size: 50
+        on_release: app.root.current = "othermenu"
+
+<OtherMenu>:
+    name: "othermenu"
+    Button:
+        text: "Example Button 2"
+        font_size: 40
+        on_release: app.root.current = "mainmenu"
