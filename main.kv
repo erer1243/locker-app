@@ -1,23 +1,25 @@
 #: import SlideTransition kivy.uix.screenmanager.SlideTransition
 ScreenDisplayController:
-    transition:
-    MainMenu:
-    OtherMenu:
-
-<MainMenu>:
-    name: "mainmenu"
-    Button:
-        text: "Example Button"
-        font_size: 50
-        on_release:
-            app.root.transition = SlideTransition(direction='left')
-            app.root.current = "othermenu"
-
-<OtherMenu>:
-    name: "othermenu"
-    Button:
-        text: "Example Button 2"
-        font_size: 40
-        on_release:
-            app.root.transition = SlideTransition(direction='right')
-            app.root.current = "mainmenu"
+    Screen:
+        name: "scr1"
+        GridLayout:
+            rows: 2
+            cols: 1
+            Label:
+                font_size: 50
+                text: str(app.paired_devices)
+                size_hint: 1, 0.2
+            Button:
+                font_size: 50
+                text: "Hello"
+                on_release:
+                    app.root.transition = SlideTransition(direction="left")
+                    app.root.current = "scr2"
+    Screen:
+        name: "scr2"
+        Button:
+            font_size: 50
+            text: "goodbye"
+            on_release:
+                app.root.transition = SlideTransition(direction="right")
+                app.root.current = "scr1"
