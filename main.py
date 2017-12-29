@@ -2,7 +2,7 @@
 import sys
 
 # java stuff
-java = False # kivy on pc can't access android java classes, disable this to use on pc
+java = True # kivy on pc can't access android java classes, disable this to use on pc
 if java:
     import os
     os.environ['JAVA_HOME'] = '/usr/lib/jvm/java-8-openjdk-amd64'
@@ -19,31 +19,31 @@ kivy.require('1.10.0')
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen
-from kivy.uix.label import Label
+
 class ScreenDisplayController(ScreenManager):
     pass
-class MainMenu(Screen):
-    pass
-class OtherMenu(Screen):
-    pass
-
 class MainApp(App):
+    def __init__(self, BluetoothSuccess,**kwargs):
+        super().__init__(**kwargs)
+        self.paired_devices = BluetoothSuccess
+
     def build(self):
         return Builder.load_file('main.kv')
 
 # when app is run directly
 if __name__ == "__main__":
+    paired_devices = None
+    if java:
+        paired_devices = BluetoothAdapter.getDefaultAdapter().getBondedDevices().toArray()
     try:
-        app = MainApp()
+        app = MainApp(paired_devices)
     except:
-        print("section 1")
         from errorpage import ErrorMain
         ErrorMain(str(sys.exc_info())).run()
 
     try:
         app.run()
     except:
-        print("section 2")
         app.stop()
         from errorpage import ErrorMain
         ErrorMain(str(sys.exc_info())).run()
