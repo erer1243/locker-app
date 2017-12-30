@@ -1,33 +1,21 @@
-import sys
+import sys, textwrap
 from kivy.uix.gridlayout import GridLayout
-from kivy.lang import Builder
-from kivy.app import App
-
+from kivy.uix.button import Button
+from kivy.uix.label import Label
 
 class FailureScreen(GridLayout):
-    message = ''
-    def __init__(self, reason, **kwargs):
+    def __init__(self, error, **kwargs):
         super().__init__(**kwargs)
-        message = reason
-
-Builder.load_string('''
-<FailureScreen>:
-    rows: 2
-    cols: 1
-    Label:
-        text: root.getFailureMessage()
-    Button:
-        text: "exit"
-        on_release: sys.exit
-        size_hint_y: .1
-''')
+        self.rows = 2
+        self.cols = 1
+        self.error = "\n".join(textwrap.wrap(error, 29))
+        self.add_widget(Label(text=self.error, font_size=80))
+        self.add_widget(Button(text="exit", on_release=sys.exit, size_hint_y=.1))
 
 if __name__ == "__main__":
+    from kivy.app import App
     class FailureTest(App):
-        def __init__(self, message, **kwargs):
-            super().__init__(**kwargs)
-            self.grid = FailureScreen(message)
         def build(self):
-            return self.grid
+            return FailureScreen("OH NO GENERIC ERRORRRRR!!!")
 
-    FailureTest("Generic error message. This appears only in debugging, you should never see this.").run()
+    FailureTest().run()
