@@ -33,7 +33,7 @@ class MainApp(App):
 
     def build(self):
         if not self.paired_devices:
-            return fail("No paired Bluetooth devices!\nPlease pair with the locker in the settings menu and restart the app.")
+            return fail("No paired Bluetooth devices! Please pair with the locker in the settings menu and restart the app.")
 
         return Builder.load_file('main.kv')
 
