@@ -2,6 +2,3 @@
 bin
 log
 __pycache__/
-media/*.kra
-fixlog.sh
-Makefile
