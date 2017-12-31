@@ -35,15 +35,20 @@ def error():
     ErrorMain(str(sys.exc_info())).run()
 
 class ScreenDisplayController(ScreenManager):
+    red = False
     def handleBluetoothID(self):
-        if not self.ids.id_entry_screen.ids.grid.ids.header.text:
-            import time
-            for _ in range(0, 5):
-                self.ids.id_entry_screen.ids.grid.ids.header.text = "[color=#ff0000]Enter Locker Bluetooth ID[/color]"
-                time.sleep(0.1)
-                self.ids.id_entry_screen.ids.grid.ids.header.text = "Enter Locker Bluetooth ID"
+        # if input text with all spaces removed is empty
+        if self.ids.idbox.text.replace(" ", "") == "":
+            log("ScreenDisplayController.handleBluetoothID", "Bluetooth ID rejected")
+            # change header colors to get user attention
+            if self.red:
+                self.ids.header.color = (1, 1, 1, 1)
+            else:
+                self.ids.header.color = (1, 0, 0, 1)
+            self.red = not self.red
+
         else:
-            log("ScreenDisplayController.handleBluetoothID", "Bluetooth ID accepted")
+            log("ScreenDisplayController.handleBluetoothID", "Bluetooth ID accepted as " + self.ids.idbox.text)
 
 
 class MainApp(App):
@@ -55,6 +60,8 @@ class MainApp(App):
             log("MainApp.checkForLocker", str(device.getName()))
 
     def build(self):
+        self.icon = "data/icon.png"
+        self.title = "Locker Controller"
         # get bluetooth default adapter
         # assumes device can use bluetooth!
         log("MainApp.build", "Getting bluetooth adapter")
