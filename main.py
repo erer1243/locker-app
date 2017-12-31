@@ -46,16 +46,16 @@ class ScreenDisplayController(ScreenManager):
                 self.ids.header.color = (1, 0, 0, 1)                                        # set it to red
             self.header_red = not self.header_red                                       # record what color it is now
 
-        else:                                                                                                   # Bluetooth id entry has a name input
+        else:                                                                                                   # if Bluetooth id entry has a name input
             log("ScreenDisplayController.handleBluetoothID", "Checking paired list for " + self.ids.idbox.text)
             if App.get_running_app().checkForLocker(self.ids.idbox.text):                                       # if that name is found
-                log("ScreenDisplayController.handleBluetoothID", "Bluetooth ID is on the paired list")          # log it
-                self.ids.header.color = (0, 1, 0, 1)                                                            # Set header color to green
-                if self.not_on_list_shown:                                                                      # if the failure text is shown
-                    self.ids.name_entry_grid.rows = 4                                                               # remove it
-                    self.not_on_list_shown = False                                                                  # .
-                    self.ids.name_entry_grid.remove_widget(self.not_on_list)                                        # .
-                self.current = "scr1"                                                                           # set screenmanager's screen to next one
+                log("ScreenDisplayController.handleBluetoothID", "Bluetooth ID is on the paired list")              # log it
+                self.ids.header.color = (0, 1, 0, 1)                                                                # Set header color to green
+                if self.not_on_list_shown:                                                                          # if the failure text is shown
+                    self.ids.name_entry_grid.rows = 4                                                                   # remove it
+                        self.not_on_list_shown = False                                                                  # .
+                    self.ids.name_entry_grid.remove_widget(self.not_on_list)                                            # .
+                self.current = "scr1"                                                                               # set screenmanager's screen to next one
 
             else:                                                                                               # if that name is not found
                 import textwrap                                                                                 # get textwrap module
