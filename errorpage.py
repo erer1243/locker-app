@@ -29,7 +29,7 @@ class ErrorGrid(GridLayout):
         self.cols = 1
         self.rows = 3
         self.add_widget(Label(text="Error traceback:", size_hint=(1, .05)))
-        self.add_widget(ErrorView(text=message.replace('\\n', '\n')))
+        self.add_widget(ErrorView(text=message.replace('\\n', '\n').replace('\\\'', '\'')))
         self.add_widget(Button(text="exit", on_release=sys.exit, size_hint=(1, .1)))
 
 class ErrorMain(App):
