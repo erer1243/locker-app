@@ -26,11 +26,13 @@ def fail(reason, **kwargs):
 class ScreenDisplayController(ScreenManager):
     pass
 class MainApp(App):
-    def __init__(self, paired_devices,**kwargs):
-        super().__init__(**kwargs)
-        self.paired_devices = paired_devices # get paired devices passed below
+    # def __init__(self, paired_devices,**kwargs):
+    #     super().__init__(**kwargs)
+    #     self.paired_devices = paired_devices # get paired devices passed below
 
     def build(self):
+        # 
+
         # if paired devices is empty
         if not self.paired_devices:
             return fail("No paired Bluetooth devices! Please pair with the locker in the settings menu and restart the app.")
@@ -42,10 +44,9 @@ class MainApp(App):
 
 # when app is run directly
 if __name__ == "__main__":
-    paired_devices = []
 
     try:
-        app = MainApp(paired_devices)
+        app = MainApp()
     except:
         from errorpage import ErrorMain
         ErrorMain(str(sys.exc_info())).run()
