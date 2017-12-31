@@ -65,31 +65,48 @@ class MainApp(App):
                 return True
         return False
 
-    def build(self):
-        # get bluetooth default adapter
-        # assumes device can use bluetooth!
-        log("MainApp.build", "Getting bluetooth adapter")
-        self.bluetooth_adapter = BluetoothAdapter.getDefaultAdapter()
+    def getBluetoothInfo(self):
         # enable bluetooth if not already
         if not self.bluetooth_adapter.isEnabled():
-            log("MainApp.build", "Enabling bluetooth adapter")
+            log("MainApp.getBluetoothInfo", "Enabling bluetooth adapter")
             self.bluetooth_adapter.enable()
             # wait for state to be STATE_ON
             while(self.bluetooth_adapter.getState() != 12): # 12 is constant for STATE_ON
                 pass
         # get paired devices from bluetoothadapter
-        log("MainApp.build", "Getting paired devices")
+        log("MainApp.getBluetoothInfo", "Getting paired devices")
         self.paired_devices = self.bluetooth_adapter.getBondedDevices().toArray()
         # if paired devices is empty
         if not self.paired_devices:
-            log("MainApp.build", "No paired devices found, failing!")
-            return fail("No paired Bluetooth devices! Please pair with the locker in the settings menu and restart the app.")
-        log("MainApp.build", "Phone has paired devices")
+            log("MainApp.getBluetoothInfo", "No paired devices found, failing!")
+            return False
+        log("MainApp.getBluetoothInfo", "Phone has paired devices")
+        return True
 
-        log("MainApp.build", "Loading first screen")
-        return Builder.load_file('main.kv')
-    def on_pause():
-        return False
+    def build(self):
+        # get bluetooth default adapter
+        # assumes device can use bluetooth!
+        log("MainApp.build", "Getting bluetooth adapter")
+        self.bluetooth_adapter = BluetoothAdapter.getDefaultAdapter()
+
+        if not self.getBluetoothInfo():
+            return fail("No paired Bluetooth devices! Please pair with the locker in the settings menu and restart the app.")
+        else:
+            log("MainApp.build", "Loading first screen")
+            return Builder.load_file('main.kv')
+
+    def on_pause(self):
+        log("MainApp.on_pause", "run")
+        return True
+    def on_start(self):
+        log("MainApp.on_start", "run")
+        return True
+    def on_stop(self):
+        log("MainApp.on_stop", "run")
+        return True
+    def on_resume(self):
+        log("Mainapp.on_resume", "run")
+        return True
 class AppManager():
     def __init__(self):
         try:
