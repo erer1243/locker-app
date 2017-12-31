@@ -35,24 +35,41 @@ def error():
     ErrorMain(str(sys.exc_info())).run()
 
 class ScreenDisplayController(ScreenManager):
-    red = False
+    header_red = False
+    not_on_list_shown = False
     def handleBluetoothID(self):
         # if input text with all spaces removed is empty
         if self.ids.idbox.text.replace(" ", "") == "":
-            log("ScreenDisplayController.handleBluetoothID", "Bluetooth ID rejected")
+            log("ScreenDisplayController.handleBluetoothID", "Bluetooth ID blank")
             # change header colors to get user attention
-            if self.red:
+            if self.header_red:
                 self.ids.header.color = (1, 1, 1, 1)
             else:
                 self.ids.header.color = (1, 0, 0, 1)
-            self.red = not self.red
+            self.header_red = not self.header_red
 
         else:
-            log("ScreenDisplayController.handleBluetoothID", "Bluetooth ID accepted as " + self.ids.idbox.text)
+            log("ScreenDisplayController.handleBluetoothID", "Checking paired list for " + self.ids.idbox.text)
             if App.get_running_app().checkForLocker(self.ids.idbox.text):
                 log("ScreenDisplayController.handleBluetoothID", "Bluetooth ID is on the paired list")
+                self.ids.header.color = (0, 1, 0, 1)
+                self.ids.name_entry_grid.rows = 4
+                if self.not_on_list_shown:
+                    self.not_on_list_shown = False
+                    self.ids.name_entry_grid.remove_widget(self.not_on_list)
+                self.current = "scr1"
             else:
-                log("ScreenDisplayController.handleBluetoothID", "Bluetooth ID is not on the paired list, failing")
+                import textwrap
+                if not self.not_on_list_shown:
+                    self.not_on_list_shown = True
+                    from kivy.uix.label import Label
+                    self.ids.name_entry_grid.rows = 5
+                    failtext = '\n'.join(textwrap.wrap('\"' + self.ids.idbox.text + '\" is not on the paired list', 25))
+                    self.not_on_list = Label(text=failtext, color=(1,0,0,1), font_size=100)
+                    self.ids.name_entry_grid.add_widget(self.not_on_list)
+                else:
+                    self.not_on_list.text = '\n'.join(textwrap.wrap('\"' + self.ids.idbox.text + '\" is not on the paired list', 25))
+                log("ScreenDisplayController.handleBluetoothID", "Bluetooth ID is not on the paired list, displaying message")
 
 
 class MainApp(App):
