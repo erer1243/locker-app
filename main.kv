@@ -3,15 +3,18 @@
 ScreenDisplayController:
     Screen:
         name: "name_entry"
+        id: id_entry_screen
         GridLayout:
+            id: grid
             rows: 4
             cols: 1
             Label:
+                id: header
                 size_hint_y: 0.5
                 font_size: 70
                 text: "Enter Locker Bluetooth ID"
             TextInput:
-                id: "input"
+                id: idbox
                 multiline: False
                 font_size: 150
                 padding_x: [self.center[0] - self._get_text_width(max(self._lines, key=len), self.tab_width, self._label_cached) / 2.0,0] if self.text else [self.center[0], 0]
@@ -20,7 +23,7 @@ ScreenDisplayController:
                 text: "Continue"
                 font_size: 100
                 size_hint_y: 0.4
-                on_release: app.checkForLocker("test")
+                on_release: root.handleBluetoothID()
             Label:
                 size_hint_y: 1
                 font_size: 60
