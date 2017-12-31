@@ -38,15 +38,13 @@ class ScreenDisplayController(ScreenManager):
     header_red = False
     not_on_list_shown = False
     def handleBluetoothID(self):
-        # if input text with all spaces removed is empty
-        if self.ids.idbox.text.replace(" ", "") == "":
+        if self.ids.idbox.text.replace(" ", "") == "":                              # if input box with spaces removed is empty
             log("ScreenDisplayController.handleBluetoothID", "Bluetooth ID blank")
-            # change header colors to get user attention
-            if self.header_red:
-                self.ids.header.color = (1, 1, 1, 1)
-            else:
-                self.ids.header.color = (1, 0, 0, 1)
-            self.header_red = not self.header_red
+            if self.header_red:                                                         # if header is currently red
+                self.ids.header.color = (1, 1, 1, 1)                                        # set it to white
+            else:                                                                       # if header is not red
+                self.ids.header.color = (1, 0, 0, 1)                                        # set it to red
+            self.header_red = not self.header_red                                       # record what color it is now
 
         else:                                                                                                   # Bluetooth id entry has a name input
             log("ScreenDisplayController.handleBluetoothID", "Checking paired list for " + self.ids.idbox.text)
