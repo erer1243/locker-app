@@ -10,6 +10,8 @@ BluetoothAdapter = autoclass('android.bluetooth.BluetoothAdapter')
 BluetoothDevice = autoclass('android.bluetooth.BluetoothDevice')
 BluetoothSocket = autoclass('android.bluetooth.BluetoothSocket')
 UUID = autoclass('java.util.UUID')
+# log(String tag, String message) tag is an identifier, usually the class it's logging from
+log = autoclass('android.util.Log').d
 
 # kivy stuff
 import kivy
@@ -26,15 +28,15 @@ def fail(reason, **kwargs):
 class ScreenDisplayController(ScreenManager):
     pass
 class MainApp(App):
-    # def __init__(self, paired_devices,**kwargs):
-    #     super().__init__(**kwargs)
-    #     self.paired_devices = paired_devices # get paired devices passed below
-
     def build(self):
-        # 
+        # assumes device can use bluetooth!
+        self.bluetooth_adapter = BluetoothAdapter.getDefaultAdapter()
+        log("mainapp.build", "Getting bluetooth adapter!")
+
 
         # if paired devices is empty
         if not self.paired_devices:
+            log("mainapp.build", "No paired devices found, failurepage.py")
             return fail("No paired Bluetooth devices! Please pair with the locker in the settings menu and restart the app.")
 
         for device in self.paired_devices:
@@ -42,8 +44,10 @@ class MainApp(App):
 
         return Builder.load_file('main.kv')
 
-# when app is run directly
-if __name__ == "__main__":
+
+def restartApp(instance=None):
+    if instance:
+        instance.stop()
 
     try:
         app = MainApp()
@@ -59,3 +63,7 @@ if __name__ == "__main__":
         app.stop()
         from errorpage import ErrorMain
         ErrorMain(str(sys.exc_info())).run()
+
+# when app is run directly
+if __name__ == "__main__":
+    restartApp()
