@@ -58,22 +58,26 @@ class ScreenDisplayController(ScreenManager):
         self.transition = NoTransition()                    # set transition to nothing so it doesn't look odd
         self.current = "makingBTconnection"                 # set screenmanager's screen to next one, move on completely
         app = App.get_running_app()
-        self.addToBluetoothConnectionLog("Creating locker socket")
+        self.addToBluetoothConnectionLog("Creating bluetooth socket")
         socket = app.createLockerSocket(device_name)
-        if not socket:
-            self.addToBluetoothConnectionLog("Could not create socket! Are you in range of the locker?", dot=False)
-            self.ids.connection_progress_grid.rows = 3
-            from kivy.uix.gridlayout import GridLayout
-            from kivy.uix.button import Button
-            buttongrid = GridLayout(rows=1, cols=2, size_hint_y=.2)
-            buttongrid.add_widget(Button(text="Retry", font_size=60, on_release=self.returnToNameEntry))
-            buttongrid.add_widget(Button(text="Exit", font_size=60, on_release=sys.exit))
-            self.ids.connection_progress_grid.add_widget(buttongrid)
-            return
+        # if not socket:
+        #     self.addToBluetoothConnectionLog("Could not create socket! Are you in range of the locker?", dot=False)
+        #     self.ids.connection_progress_grid.rows = 3
+        #     from kivy.uix.gridlayout import GridLayout
+        #     from kivy.uix.button import Button
+        #     buttongrid = GridLayout(rows=1, cols=2, size_hint_y=.2)
+        #     buttongrid.add_widget(Button(text="Retry", font_size=60, on_release=self.returnToNameEntry))
+        #     buttongrid.add_widget(Button(text="Exit", font_size=60, on_release=sys.exit))
+        #     self.ids.connection_progress_grid.add_widget(buttongrid)
+        #     return
+        log("ScreenDisplayController.bluetoothBasedDisplayManager", "Got socket")
+        rstream = socket.getInputStream()
+        sstream = socket.getOutputStream()
 
     header_red = False
     not_on_list_shown = False
     def handleBluetoothID(self):
+        App.get_running_app().startBluetoothAdapter()
         if self.ids.idbox.text.replace(" ", "") == "":                              # if input box with spaces removed is empty
             log("ScreenDisplayController.handleBluetoothID", "Bluetooth ID blank")
             if self.header_red:                                                         # if header is currently red
@@ -114,11 +118,17 @@ class MainApp(App):
     UUIDString = "00001101-0000-1000-8000-00805F9B34FB"
 
     def createLockerSocket(self, name):
+        log("MainApp.createLockerSocket", "creating locker socket from name " + name)
         for device in self.paired_devices:
+            log("MainApp.createLockerSocket", "Comparting " + name + " to " + device.getName())
             if device.getName() == name:
-                return device.createRfcommSocketToServiceRecord(
+                log("MainApp.createLockerSocket", "it's a match!")
+                socket = device.createRfcommSocketToServiceRecord(
                     UUID.fromString(self.UUIDString)
                 )
+                log("MainApp.createLockerSocket", str(type(socket)))
+                return socket
+        log("MainApp.createLockerSocket", "could not create socket")
         return None
 
     def checkForLocker(self, name):
@@ -127,14 +137,17 @@ class MainApp(App):
                 return True
         return False
 
-    def getBluetoothInfo(self):
+    def startBluetoothAdapter(self):
         # enable bluetooth if not already
         if not self.bluetooth_adapter.isEnabled():
-            log("MainApp.getBluetoothInfo", "Enabling bluetooth adapter")
+            log("MainApp.startBluetoothAdapter", "Enabling bluetooth adapter")
             self.bluetooth_adapter.enable()
         # wait for state to be STATE_ON
         while(self.bluetooth_adapter.getState() != 12): # 12 is constant for STATE_ON
             pass
+
+    def getBluetoothInfo(self):
+        self.startBluetoothAdapter()
         # get paired devices from bluetoothadapter
         log("MainApp.getBluetoothInfo", "Getting paired devices")
         self.paired_devices = self.bluetooth_adapter.getBondedDevices().toArray()
