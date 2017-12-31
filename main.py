@@ -11,7 +11,9 @@ BluetoothDevice = autoclass('android.bluetooth.BluetoothDevice')
 BluetoothSocket = autoclass('android.bluetooth.BluetoothSocket')
 UUID = autoclass('java.util.UUID')
 # log(String tag, String message) tag is an identifier, usually the class it's logging from
-log = autoclass('android.util.Log').d
+logd = autoclass('android.util.Log').d
+def log(tag, message):
+    logd("\nlocker-controller." + tag, message+'\n')
 
 # kivy stuff
 import kivy
@@ -28,42 +30,44 @@ def fail(reason, **kwargs):
 class ScreenDisplayController(ScreenManager):
     pass
 class MainApp(App):
+    def checkForLocker(self, name):
+        for device in self.paired_devices:
+            log("mainapp.checkForLocker", str(device))
+
     def build(self):
+        log("mainapp.build", "Doing bluetoothAdapter things")
+        # get bluetooth default adapter
         # assumes device can use bluetooth!
         self.bluetooth_adapter = BluetoothAdapter.getDefaultAdapter()
-        log("mainapp.build", "Getting bluetooth adapter!")
-
+        # attempt to enable bluetooth
+        self.bluetooth_adapter.enable()
+        # get paired devices from bluetoothadapter
+        self.paired_devices = self.bluetooth_adapter.getBondedDevices().toArray()
 
         # if paired devices is empty
         if not self.paired_devices:
-            log("mainapp.build", "No paired devices found, failurepage.py")
+            log("mainapp.build", "No paired devices found, failing!")
             return fail("No paired Bluetooth devices! Please pair with the locker in the settings menu and restart the app.")
-
-        for device in self.paired_devices:
-            print(device)
 
         return Builder.load_file('main.kv')
 
-
-def restartApp(instance=None):
-    if instance:
-        instance.stop()
-
-    try:
-        app = MainApp()
-    except:
-        from errorpage import ErrorMain
-        ErrorMain(str(sys.exc_info())).run()
-
-    try:
-        app.run()
-    except SystemExit:
-        sys.exit()
-    except:
-        app.stop()
-        from errorpage import ErrorMain
-        ErrorMain(str(sys.exc_info())).run()
+class AppManager():
+    def __init__(self):
+        try:
+            self.app = MainApp()
+        except:
+            from errorpage import ErrorMain
+            ErrorMain(str(sys.exc_info())).run()
+        # try running the app, where it will most likely fail
+        try:
+            self.app.run()
+        except SystemExit: # if sys.exit is called, allow it to finish and quit
+            sys.exit()
+        except: # otherwise stop the app and show error
+            self.app.stop()
+            from errorpage import ErrorMain
+            ErrorMain(str(sys.exc_info())).run()
 
 # when app is run directly
 if __name__ == "__main__":
-    restartApp()
+    AppManager()
