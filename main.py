@@ -46,6 +46,8 @@ class ScreenDisplayController(ScreenManager):
         to_be_appended = '\n'.join(wrap(to_be_appended, 30))
         to_be_appended += '\n'
         self.ids.connection_progress_log.text += to_be_appended
+    def returnToNameEntry(self, btn):
+        self.current = "name_entry"
 
     def bluetoothBasedDisplayManager(self):
         device_name = self.handleBluetoothID()              # get entered bluetooth ID if correct, else None
@@ -60,7 +62,14 @@ class ScreenDisplayController(ScreenManager):
         socket = app.createLockerSocket(device_name)
         if not socket:
             self.addToBluetoothConnectionLog("Could not create socket! Are you in range of the locker?", dot=False)
-
+            self.ids.connection_progress_grid.rows = 3
+            from kivy.uix.gridlayout import GridLayout
+            from kivy.uix.button import Button
+            buttongrid = GridLayout(rows=1, cols=2, size_hint_y=.2)
+            buttongrid.add_widget(Button(text="Retry", font_size=60, on_release=self.returnToNameEntry))
+            buttongrid.add_widget(Button(text="Exit", font_size=60, on_release=sys.exit))
+            self.ids.connection_progress_grid.add_widget(buttongrid)
+            return
 
     header_red = False
     not_on_list_shown = False
@@ -106,7 +115,7 @@ class MainApp(App):
 
     def createLockerSocket(self, name):
         for device in self.paired_devices:
-            if devices.getName() == name
+            if device.getName() == name:
                 return device.createRfcommSocketToServiceRecord(
                     UUID.fromString(self.UUIDString)
                 )
