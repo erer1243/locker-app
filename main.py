@@ -60,8 +60,6 @@ class MainApp(App):
             log("MainApp.checkForLocker", str(device.getName()))
 
     def build(self):
-        self.icon = "data/icon.png"
-        self.title = "Locker Controller"
         # get bluetooth default adapter
         # assumes device can use bluetooth!
         log("MainApp.build", "Getting bluetooth adapter")
