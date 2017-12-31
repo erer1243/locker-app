@@ -95,18 +95,6 @@ class MainApp(App):
             log("MainApp.build", "Loading first screen")
             return Builder.load_file('main.kv')
 
-    def on_pause(self):
-        log("MainApp.on_pause", "run")
-        return True
-    def on_start(self):
-        log("MainApp.on_start", "run")
-        return True
-    def on_stop(self):
-        log("MainApp.on_stop", "run")
-        return True
-    def on_resume(self):
-        log("Mainapp.on_resume", "run")
-        return True
 class AppManager():
     def __init__(self):
         try:
