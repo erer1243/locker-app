@@ -48,27 +48,32 @@ class ScreenDisplayController(ScreenManager):
                 self.ids.header.color = (1, 0, 0, 1)
             self.header_red = not self.header_red
 
-        else:
+        else:                                                                                                   # Bluetooth id entry has a name input
             log("ScreenDisplayController.handleBluetoothID", "Checking paired list for " + self.ids.idbox.text)
-            if App.get_running_app().checkForLocker(self.ids.idbox.text):
-                log("ScreenDisplayController.handleBluetoothID", "Bluetooth ID is on the paired list")
-                self.ids.header.color = (0, 1, 0, 1)
-                self.ids.name_entry_grid.rows = 4
-                if self.not_on_list_shown:
-                    self.not_on_list_shown = False
-                    self.ids.name_entry_grid.remove_widget(self.not_on_list)
-                self.current = "scr1"
-            else:
-                import textwrap
-                if not self.not_on_list_shown:
-                    self.not_on_list_shown = True
-                    from kivy.uix.label import Label
-                    self.ids.name_entry_grid.rows = 5
-                    failtext = '\n'.join(textwrap.wrap('\"' + self.ids.idbox.text + '\" is not on the paired list', 25))
-                    self.not_on_list = Label(text=failtext, color=(1,0,0,1), font_size=100)
-                    self.ids.name_entry_grid.add_widget(self.not_on_list)
-                else:
-                    self.not_on_list.text = '\n'.join(textwrap.wrap('\"' + self.ids.idbox.text + '\" is not on the paired list', 25))
+            if App.get_running_app().checkForLocker(self.ids.idbox.text):                                       # if that name is found
+                log("ScreenDisplayController.handleBluetoothID", "Bluetooth ID is on the paired list")          # log it
+                self.ids.header.color = (0, 1, 0, 1)                                                            # Set header color to green
+                if self.not_on_list_shown:                                                                      # if the failure text is shown
+                    self.ids.name_entry_grid.rows = 4                                                               # remove it
+                    self.not_on_list_shown = False                                                                  # .
+                    self.ids.name_entry_grid.remove_widget(self.not_on_list)                                        # .
+                self.current = "scr1"                                                                           # set screenmanager's screen to next one
+
+            else:                                                                                               # if that name is not found
+                import textwrap                                                                                 # get textwrap module
+                if not self.not_on_list_shown:                                                                  # if failure text isn't shown
+                    self.not_on_list_shown = True                                                                   # record that it is now showing
+                    from kivy.uix.label import Label                                                                # import label class
+                    self.ids.name_entry_grid.rows = 5                                                               # add extra row to gridmanager
+                    failtext = '\"' + self.ids.idbox.text + '\" is not on the paired list'                          # make failtext with entered bluetooth ID
+                    failtext = '\n'.join(textwrap.wrap(failtext, 25))                                               # wrap that failtext to fit screen
+                    self.not_on_list = Label(text=failtext, color=(1,0,0,1), font_size=100)                         # create a label from that failtext
+                    self.ids.name_entry_grid.add_widget(self.not_on_list)                                           # add the failtext to screen
+
+                else:                                                                                           # if the failuretext is already shown
+                    failtext = '\"' + self.ids.idbox.text + '\" is not on the paired list'                      # make failtext with entered bluetooth ID
+                    failtext = '\n'.join(textwrap.wrap(failtext, 25))                                           # wrap the failtext to fit screen
+                    self.not_on_list.text = failtext                                                            # change label to hold new failtext
                 log("ScreenDisplayController.handleBluetoothID", "Bluetooth ID is not on the paired list, displaying message")
 
 
