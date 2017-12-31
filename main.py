@@ -23,9 +23,16 @@ from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen
 
 # display simple failure page
+# not to be used for catastrophic failure
 def fail(reason, **kwargs):
     from failurepage import FailureScreen
     return FailureScreen(reason, **kwargs)
+
+# display simple traceback page
+# to be used in event of total failure
+def error():
+    from errorpage import ErrorMain
+    ErrorMain(str(sys.exc_info())).run()
 
 class ScreenDisplayController(ScreenManager):
     pass
@@ -49,12 +56,12 @@ class MainApp(App):
         # get paired devices from bluetoothadapter
         log("mainapp.build", "Getting paired devices")
         self.paired_devices = self.bluetooth_adapter.getBondedDevices().toArray()
-
         # if paired devices is empty
         if not self.paired_devices:
             log("mainapp.build", "No paired devices found, failing!")
             return fail("No paired Bluetooth devices! Please pair with the locker in the settings menu and restart the app.")
         log("mainapp.build", "Phone has paired devices")
+
         log("mainapp.build", "Loading first screen")
         return Builder.load_file('main.kv')
 
@@ -63,17 +70,16 @@ class AppManager():
         try:
             self.app = MainApp()
         except:
-            from errorpage import ErrorMain
-            ErrorMain(str(sys.exc_info())).run()
-        # try running the app, where it will most likely fail
+            error()
+
+        # try running the app, this is where it will most likely fail
         try:
             self.app.run()
         except SystemExit: # if sys.exit is called, allow it to finish and quit
             sys.exit()
         except: # otherwise stop the app and show error
             self.app.stop()
-            from errorpage import ErrorMain
-            ErrorMain(str(sys.exc_info())).run()
+            error()
 
 # when app is run directly
 if __name__ == "__main__":
