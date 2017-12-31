@@ -32,23 +32,30 @@ class ScreenDisplayController(ScreenManager):
 class MainApp(App):
     def checkForLocker(self, name):
         for device in self.paired_devices:
-            log("mainapp.checkForLocker", str(device))
+            log("mainapp.checkForLocker", str(device.getName()))
 
     def build(self):
-        log("mainapp.build", "Doing bluetoothAdapter things")
         # get bluetooth default adapter
         # assumes device can use bluetooth!
+        log("mainapp.build", "Getting bluetooth adapter")
         self.bluetooth_adapter = BluetoothAdapter.getDefaultAdapter()
-        # attempt to enable bluetooth
-        self.bluetooth_adapter.enable()
+        # enable bluetooth if not already
+        if not self.bluetooth_adapter.isEnabled():
+            log("mainapp.build", "Enabling bluetooth adapter")
+            self.bluetooth_adapter.enable()
+            # wait for state to be STATE_ON
+            while(self.bluetooth_adapter.getState() != 12): # 12 is constant for STATE_ON
+                pass
         # get paired devices from bluetoothadapter
+        log("mainapp.build", "Getting paired devices")
         self.paired_devices = self.bluetooth_adapter.getBondedDevices().toArray()
 
         # if paired devices is empty
         if not self.paired_devices:
             log("mainapp.build", "No paired devices found, failing!")
             return fail("No paired Bluetooth devices! Please pair with the locker in the settings menu and restart the app.")
-
+        log("mainapp.build", "Phone has paired devices")
+        log("mainapp.build", "Loading first screen")
         return Builder.load_file('main.kv')
 
 class AppManager():
