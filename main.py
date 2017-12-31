@@ -49,6 +49,10 @@ class ScreenDisplayController(ScreenManager):
 
         else:
             log("ScreenDisplayController.handleBluetoothID", "Bluetooth ID accepted as " + self.ids.idbox.text)
+            if App.get_running_app().checkForLocker(self.ids.idbox.text):
+                log("ScreenDisplayController.handleBluetoothID", "Bluetooth ID is on the paired list")
+            else:
+                log("ScreenDisplayController.handleBluetoothID", "Bluetooth ID is not on the paired list, failing")
 
 
 class MainApp(App):
@@ -57,7 +61,9 @@ class MainApp(App):
 
     def checkForLocker(self, name):
         for device in self.paired_devices:
-            log("MainApp.checkForLocker", str(device.getName()))
+            if device.getName() == name:
+                return True
+        return False
 
     def build(self):
         # get bluetooth default adapter
@@ -82,7 +88,8 @@ class MainApp(App):
 
         log("MainApp.build", "Loading first screen")
         return Builder.load_file('main.kv')
-
+    def on_pause():
+        return False
 class AppManager():
     def __init__(self):
         try:
