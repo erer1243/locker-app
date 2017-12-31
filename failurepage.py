@@ -16,6 +16,6 @@ if __name__ == "__main__":
     from kivy.app import App
     class FailureTest(App):
         def build(self):
-            return FailureScreen("OH NO GENERIC ERRORRRRR!!!")
+            return FailureScreen("generic error generic error generic error generic error")
 
     FailureTest().run()
