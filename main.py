@@ -42,36 +42,40 @@ class ScreenDisplayController(ScreenManager):
                 self.ids.id_entry_screen.ids.grid.ids.header.text = "[color=#ff0000]Enter Locker Bluetooth ID[/color]"
                 time.sleep(0.1)
                 self.ids.id_entry_screen.ids.grid.ids.header.text = "Enter Locker Bluetooth ID"
+        else:
+            log("ScreenDisplayController.handleBluetoothID", "Bluetooth ID accepted")
+
+
 class MainApp(App):
     def log(self, tag, message):
         log(tag, message)
 
     def checkForLocker(self, name):
         for device in self.paired_devices:
-            log("mainapp.checkForLocker", str(device.getName()))
+            log("MainApp.checkForLocker", str(device.getName()))
 
     def build(self):
         # get bluetooth default adapter
         # assumes device can use bluetooth!
-        log("mainapp.build", "Getting bluetooth adapter")
+        log("MainApp.build", "Getting bluetooth adapter")
         self.bluetooth_adapter = BluetoothAdapter.getDefaultAdapter()
         # enable bluetooth if not already
         if not self.bluetooth_adapter.isEnabled():
-            log("mainapp.build", "Enabling bluetooth adapter")
+            log("MainApp.build", "Enabling bluetooth adapter")
             self.bluetooth_adapter.enable()
             # wait for state to be STATE_ON
             while(self.bluetooth_adapter.getState() != 12): # 12 is constant for STATE_ON
                 pass
         # get paired devices from bluetoothadapter
-        log("mainapp.build", "Getting paired devices")
+        log("MainApp.build", "Getting paired devices")
         self.paired_devices = self.bluetooth_adapter.getBondedDevices().toArray()
         # if paired devices is empty
         if not self.paired_devices:
-            log("mainapp.build", "No paired devices found, failing!")
+            log("MainApp.build", "No paired devices found, failing!")
             return fail("No paired Bluetooth devices! Please pair with the locker in the settings menu and restart the app.")
-        log("mainapp.build", "Phone has paired devices")
+        log("MainApp.build", "Phone has paired devices")
 
-        log("mainapp.build", "Loading first screen")
+        log("MainApp.build", "Loading first screen")
         return Builder.load_file('main.kv')
 
 class AppManager():
