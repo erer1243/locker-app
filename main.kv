@@ -39,21 +39,6 @@ ScreenDisplayController:
                 font_size: 60
                 text: '\n'.join(textwrap.wrap("You must be paired with the locker before starting the app. Go to settings and do so if you are not paired already. \nPress R button to refresh paired list.", 40))
     Screen:
-        name: "makingBTconnection"
-        GridLayout:
-            id: connection_progress_grid
-            rows: 2
-            cols: 1
-            Label:
-                color: 0, 0.6, 1, 1
-                font_size: 100
-                size_hint_y: .1
-                text: "Connecting to Locker"
-            Label:
-                id: connection_progress_log
-                text: ""
-                font_size: 80
-    Screen:
         name: "scr2"
         Button:
             font_size: 50

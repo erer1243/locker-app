@@ -37,15 +37,6 @@ def error():
     ErrorMain(str(sys.exc_info())).run()
 
 class ScreenDisplayController(ScreenManager):
-    def addToBluetoothConnectionLog(self, message, dot=True):
-        log("ScreenDisplayController.addToBluetoothConnectionLog", message)
-        if dot:
-            to_be_appended = "•" + message
-        else:
-            to_be_appended = message
-        to_be_appended = '\n'.join(wrap(to_be_appended, 30))
-        to_be_appended += '\n'
-        self.ids.connection_progress_log.text += to_be_appended
     def returnToNameEntry(self, btn):
         self.current = "name_entry"
 
@@ -54,25 +45,19 @@ class ScreenDisplayController(ScreenManager):
         log("ScreenDisplayController.bluetoothBasedDisplayManager", "device name passed from handler: " + device_name)
         if not device_name:                                 # if entered bluetooth ID is bad
             return                                              # do nothing
-        from kivy.uix.screenmanager import NoTransition     # get NoTransition transition module to apply
-        self.transition = NoTransition()                    # set transition to nothing so it doesn't look odd
-        self.current = "makingBTconnection"                 # set screenmanager's screen to next one, move on completely
         app = App.get_running_app()
-        self.addToBluetoothConnectionLog("Creating bluetooth socket")
+        log("DEBUG", "Creating bluetooth socket")
         socket = app.createLockerSocket(device_name)
-        # if not socket:
-        #     self.addToBluetoothConnectionLog("Could not create socket! Are you in range of the locker?", dot=False)
-        #     self.ids.connection_progress_grid.rows = 3
-        #     from kivy.uix.gridlayout import GridLayout
-        #     from kivy.uix.button import Button
-        #     buttongrid = GridLayout(rows=1, cols=2, size_hint_y=.2)
-        #     buttongrid.add_widget(Button(text="Retry", font_size=60, on_release=self.returnToNameEntry))
-        #     buttongrid.add_widget(Button(text="Exit", font_size=60, on_release=sys.exit))
-        #     self.ids.connection_progress_grid.add_widget(buttongrid)
-        #     return
+        socket.connect()
         log("ScreenDisplayController.bluetoothBasedDisplayManager", "Got socket")
+        log("ScreenDisplayController.bluetoothBasedDisplayManager", str(socket.isConnected()))
         rstream = socket.getInputStream()
         sstream = socket.getOutputStream()
+
+        log("DEBUG", str(type(rstream)))
+        log("DEBUG", str(type(sstream)))
+        sstream.write("test :O\n")
+        sstream.flush()
 
     header_red = False
     not_on_list_shown = False
