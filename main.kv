@@ -15,6 +15,7 @@ ScreenDisplayController:
                 text: "Enter Locker Bluetooth ID"
             TextInput:
                 id: idbox
+                text: "Locker0"
                 multiline: False
                 font_size: 150
                 padding_x: [self.center[0] - self._get_text_width(max(self._lines, key=len), self.tab_width, self._label_cached) / 2.0,0] if self.text else [self.center[0], 0]
@@ -32,26 +33,25 @@ ScreenDisplayController:
                     text: "Continue"
                     font_size: 100
                     size_hint_x: 0.8
-                    on_release: root.handleBluetoothID()
+                    on_release: root.bluetoothBasedDisplayManager()
             Label:
                 size_hint_y: 1
                 font_size: 60
                 text: '\n'.join(textwrap.wrap("You must be paired with the locker before starting the app. Go to settings and do so if you are not paired already. \nPress R button to refresh paired list.", 40))
     Screen:
-        name: "scr1"
+        name: "makingBTconnection"
         GridLayout:
             rows: 2
             cols: 1
             Label:
-                font_size: 50
-                text: "placeholder"
-                size_hint: 1, 0.2
-            Button:
-                font_size: 50
-                text: "Hello"
-                on_release:
-                    app.root.transition = SlideTransition(direction="left")
-                    app.root.current = "scr2"
+                color: 0, 0.6, 1, 1
+                font_size: 100
+                size_hint_y: .1
+                text: "Connecting to Locker"
+            Label:
+                id: connection_progress_log
+                text: ""
+                font_size: 80
     Screen:
         name: "scr2"
         Button:
