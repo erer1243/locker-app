@@ -35,8 +35,17 @@ def error():
     ErrorMain(str(sys.exc_info())).run()
 
 class ScreenDisplayController(ScreenManager):
-    pass
+    def handleBluetoothID(self):
+        if not self.ids.id_entry_screen.ids.grid.ids.header.text:
+            import time
+            for _ in range(0, 5):
+                self.ids.id_entry_screen.ids.grid.ids.header.text = "[color=#ff0000]Enter Locker Bluetooth ID[/color]"
+                time.sleep(0.1)
+                self.ids.id_entry_screen.ids.grid.ids.header.text = "Enter Locker Bluetooth ID"
 class MainApp(App):
+    def log(self, tag, message):
+        log(tag, message)
+
     def checkForLocker(self, name):
         for device in self.paired_devices:
             log("mainapp.checkForLocker", str(device.getName()))
