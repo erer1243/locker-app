@@ -23,13 +23,29 @@ import kivy
 kivy.require('1.10.0')
 from kivy.app import App
 from kivy.lang import Builder
+from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import ScreenManager, Screen
-
+from kivy.uix.button import Button
+from kivy.uix.gridlayout import GridLayout
 # display simple traceback page
 # to be used in event of total failure
 def error():
     from errorpage import ErrorMain
     ErrorMain(str(sys.exc_info())).run()
+
+def popup(title, message):
+    log("popup", "Showing popup for message: " + message)
+    popup = Popup()
+    popup.auto_close = False
+
+    pgrid = GridLayout()
+    pgrid.rows = 2
+    pgrid.cols = 1
+    pgrid.add_widget(Label(text=textwrap.wrap(message, 60), font_size=60, size_hint_y: .8))
+    pgrid.add_widget(Button(text="Close", on_release=popup.dismiss()))
+
+    popup.content = pgrid
+    popup.open()
 
 class ScreenDisplayController(ScreenManager):
     def __init__(self, firstpage, **kwargs):
@@ -43,44 +59,22 @@ class ScreenDisplayController(ScreenManager):
             return                                              # do nothing
         app = App.get_running_app()
 
-    header_red = False
-    not_on_list_shown = False
     def handleBluetoothID(self):
         App.get_running_app().startBluetoothAdapter()
         if self.ids.idbox.text.replace(" ", "") == "":                              # if input box with spaces removed is empty
             log("ScreenDisplayController.handleBluetoothID", "Bluetooth ID blank")
-            if self.header_red:                                                         # if header is currently red
-                self.ids.header.color = (1, 1, 1, 1)                                        # set it to white
-            else:                                                                       # if header is not red
-                self.ids.header.color = (1, 0, 0, 1)                                        # set it to red
-            self.header_red = not self.header_red                                       # record what color it is now
+            popup("Bluetooth ID Entry Error", "ID input is blank, please input a name...")
 
-        else:                                                                                                   # if Bluetooth id entry has a name input
+        else:                                                             # if Bluetooth id entry has a name input
             log("ScreenDisplayController.handleBluetoothID", "Checking paired list for " + self.ids.idbox.text)
-            if App.get_running_app().checkForLocker(self.ids.idbox.text):                                       # if that name is found
-                log("ScreenDisplayController.handleBluetoothID", "Bluetooth ID is on the paired list")              # log it
-                self.ids.header.color = (1, 1, 1, 1)                                                                # Set header color to white
-                if self.not_on_list_shown:                                                                          # if the failure text is shown
-                    self.ids.name_entry_grid.rows = 4                                                                   # remove it
-                    self.not_on_list_shown = False                                                                      # .
-                    self.ids.name_entry_grid.remove_widget(self.not_on_list)                                            # .
+            if App.get_running_app().checkForLocker(self.ids.idbox.text): # if that name is found
+                log("ScreenDisplayController.handleBluetoothID", "Bluetooth ID is on the paired list")
                 return self.ids.idbox.text
 
-            else:                                                                                               # if that name is not found
-                if not self.not_on_list_shown:                                                                  # if failure text isn't shown
-                    self.not_on_list_shown = True                                                                   # record that it is now showing
-                    from kivy.uix.label import Label                                                                # import label class
-                    self.ids.name_entry_grid.rows = 5                                                               # add extra row to gridmanager
-                    failtext = '\"' + self.ids.idbox.text + '\" is not on the paired list'                          # make failtext with entered bluetooth ID
-                    failtext = '\n'.join(wrap(failtext, 25))                                               # wrap that failtext to fit screen
-                    self.not_on_list = Label(text=failtext, color=(1,0,0,1), font_size=100)                         # create a label from that failtext
-                    self.ids.name_entry_grid.add_widget(self.not_on_list)                                           # add the failtext to screen
-
-                else:                                                                                           # if the failuretext is already shown
-                    failtext = '\"' + self.ids.idbox.text + '\" is not on the paired list'                      # make failtext with entered bluetooth ID
-                    failtext = '\n'.join(wrap(failtext, 25))                                           # wrap the failtext to fit screen
-                    self.not_on_list.text = failtext                                                            # change label to hold new failtext
+            else:                                                         # if that name is not found
                 log("ScreenDisplayController.handleBluetoothID", "Bluetooth ID is not on the paired list, displaying message")
+                popup("Bluetooth ID Entry Error", "Bluetooth ID " + self.ids.idbox.text + " is not on the list.")
+
         return None
 
 class MainApp(App):
