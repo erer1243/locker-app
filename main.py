@@ -35,7 +35,9 @@ from kivy.uix.gridlayout import GridLayout
 # to be used in event of total failure
 def error():
     from errorpage import ErrorMain
-    ErrorMain(str(sys.exc_info())).run()
+    msg = str(sys.exc_info())
+    log("error", msg)
+    ErrorMain(msg).run()
 
 def popup(title, message):
     log("popup", "Showing popup for message: " + message)
@@ -44,9 +46,8 @@ def popup(title, message):
     popup.size_hint = (None, None)
     popup.title = title
 
-    text = wrap(message, 30)
+    text = wrap(message, 35)
     text = '\n'.join(text)
-
     label = Label(text=text, font_size=60)
     label.texture_update()
 
@@ -55,7 +56,6 @@ def popup(title, message):
     pgrid.cols = 1
     pgrid.add_widget(label)
     pgrid.add_widget(Button(text="Close", on_release=popup.dismiss, size_hint_y=.3))
-
     popup.size = (1000, label.texture_size[1]+400)
     popup.content = pgrid
     popup.open()
@@ -66,16 +66,15 @@ class ScreenDisplayController(ScreenManager):
         self.current = firstpage
 
     def bluetoothBasedDisplayManager(self):
-        popup("Testr", "EADSDCJASKDFJfasd asdf asdf asdf asdf asdf asdf asdfasd fsa df asdasdf asdf asdf")
         device_name = self.handleBluetoothID()              # get entered bluetooth ID if correct, else None
-        log("ScreenDisplayController.bluetoothBasedDisplayManager", "device name passed from handler: " + device_name)
+        log("ScreenDisplayController.bluetoothBasedDisplayManager", "device name passed from handler: " + str(device_name))
         if not device_name:                                 # if entered bluetooth ID is bad
             return                                              # do nothing
         app = App.get_running_app()
 
     def handleBluetoothID(self):
         App.get_running_app().startBluetoothAdapter()
-        if self.ids.idbox.text.replace(" ", "") == "":                              # if input box with spaces removed is empty
+        if self.ids['idbox'].text.replace(" ", "") == "":                              # if input box with spaces removed is empty
             log("ScreenDisplayController.handleBluetoothID", "Bluetooth ID blank")
             popup("Bluetooth ID Entry Error", "ID input is blank, please input a name.")
 
