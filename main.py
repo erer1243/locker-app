@@ -10,7 +10,8 @@ from jnius import autoclass
 # get android bluetooth classes
 BluetoothAdapter = autoclass('android.bluetooth.BluetoothAdapter')
 BluetoothDevice = autoclass('android.bluetooth.BluetoothDevice')
-BluetoothSocket = autoclass('android.bluetooth.BluetoothSocket')
+BluetoothGattCallback = autoclass('android.bluetooth.BluetoothGattCallback')
+BluetoothGatt = autoclass('android.bluetooth.BluetoothGatt')
 UUID = autoclass('java.util.UUID')
 # log(String tag, String message) tag is an identifier, usually the class it's logging from
 logd = autoclass('android.util.Log').d
@@ -24,12 +25,6 @@ from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen
 
-# display simple failure page
-# not to be used for catastrophic failure
-def fail(reason, **kwargs):
-    from failurepage import FailureScreen
-    return FailureScreen(reason, **kwargs)
-
 # display simple traceback page
 # to be used in event of total failure
 def error():
@@ -37,6 +32,10 @@ def error():
     ErrorMain(str(sys.exc_info())).run()
 
 class ScreenDisplayController(ScreenManager):
+    def __init__(self, firstpage, **kwargs):
+        super().__init__(**kwargs)
+        self.current = firstpage
+
     def bluetoothBasedDisplayManager(self):
         device_name = self.handleBluetoothID()              # get entered bluetooth ID if correct, else None
         log("ScreenDisplayController.bluetoothBasedDisplayManager", "device name passed from handler: " + device_name)
@@ -85,6 +84,11 @@ class ScreenDisplayController(ScreenManager):
         return None
 
 class MainApp(App):
+    # get bluetooth default adapter
+    # assumes device can use bluetooth!
+    bluetooth_adapter = BluetoothAdapter.getDefaultAdapter()
+    bluetooth_gatt_callback = BluetoothGattCallback()
+
     # UUIDString = "00001101-0000-1000-8000-00805F9B34FB" # generic primary access, not adafruit specific
     # UUIDString = "6E400001-B5A3-F393-E0A9-E50E24DCCA9E" # generic uart from adafruit site
     UUIDString = "6E400002-B5A3-F393-E0A9-E50E24DCCA9E" # TX uart from adafruit site
@@ -118,16 +122,15 @@ class MainApp(App):
         return True
 
     def build(self):
-        # get bluetooth default adapter
-        # assumes device can use bluetooth!
-        log("MainApp.build", "Getting bluetooth adapter")
-        self.bluetooth_adapter = BluetoothAdapter.getDefaultAdapter()
+        Builder.load_file('main.kv')
 
         if not self.getBluetoothInfo():
-            return fail("No paired Bluetooth devices! Please pair with the locker in the settings menu and restart the app.")
+            log("MainApp.build", "Loading first screen no_paired_devices_failure")
+            self.SDC = ScreenDisplayController("no_paired_devices_failure")
         else:
-            log("MainApp.build", "Loading first screen")
-            return Builder.load_file('main.kv')
+            log("MainApp.build", "Loading first screen name_entry")
+            self.SDC = ScreenDisplayController("name_entry")
+        return self.SDC
 
 class AppManager():
     def __init__(self):

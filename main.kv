@@ -1,6 +1,7 @@
 #: import SlideTransition kivy.uix.screenmanager.SlideTransition
 #: import textwrap textwrap
-ScreenDisplayController:
+#: import sys sys
+<ScreenDisplayController>:
     id: controller
     Screen:
         name: "name_entry"
@@ -39,10 +40,15 @@ ScreenDisplayController:
                 font_size: 60
                 text: '\n'.join(textwrap.wrap("You must be paired with the locker before starting the app. Go to settings and do so if you are not paired already. \nPress R button to refresh paired list.", 40))
     Screen:
-        name: "scr2"
-        Button:
-            font_size: 50
-            text: "goodbye"
-            on_release:
-                app.root.transition = SlideTransition(direction="right")
-                app.root.current = "scr1"
+        name: "no_paired_devices_failure"
+        GridLayout:
+            rows: 2
+            cols: 1
+            Label:
+                text: "\n".join(textwrap.wrap("No paired Bluetooth devices! Please pair with the locker in the settings menu and restart the app.", 29))
+                font_size: 80
+            Button:
+                text: "Exit App"
+                font_size: 80
+                size_hint_y: .1
+                on_release: sys.exit()
