@@ -2,3 +2,4 @@
 bin
 log
 __pycache__/
+backup.py
