@@ -1,9 +1,9 @@
-# python stuff
+'''python stuff'''
 import sys
 from textwrap import wrap
 from time import sleep
 
-# java stuff
+'''java stuff'''
 import os
 os.environ['JAVA_HOME'] = '/usr/lib/jvm/java-8-openjdk-amd64'
 from jnius import autoclass
@@ -18,14 +18,18 @@ logd = autoclass('android.util.Log').d
 def log(tag, message):
     logd("\nlocker-controller." + tag, message+'\n')
 
-# kivy stuff
+'''kivy stuff'''
 import kivy
 kivy.require('1.10.0')
+# systems
 from kivy.app import App
 from kivy.lang import Builder
+from kivy.clock import Clock
+# visual stuff
 from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.button import Button
+from kivy.uix.label import Label
 from kivy.uix.gridlayout import GridLayout
 # display simple traceback page
 # to be used in event of total failure
@@ -37,13 +41,22 @@ def popup(title, message):
     log("popup", "Showing popup for message: " + message)
     popup = Popup()
     popup.auto_close = False
+    popup.size_hint = (None, None)
+    popup.title = title
+
+    text = wrap(message, 30)
+    text = '\n'.join(text)
+
+    label = Label(text=text, font_size=60)
+    label.texture_update()
 
     pgrid = GridLayout()
     pgrid.rows = 2
     pgrid.cols = 1
-    pgrid.add_widget(Label(text=textwrap.wrap(message, 60), font_size=60, size_hint_y: .8))
-    pgrid.add_widget(Button(text="Close", on_release=popup.dismiss()))
+    pgrid.add_widget(label)
+    pgrid.add_widget(Button(text="Close", on_release=popup.dismiss, size_hint_y=.3))
 
+    popup.size = (1000, label.texture_size[1]+400)
     popup.content = pgrid
     popup.open()
 
@@ -53,6 +66,7 @@ class ScreenDisplayController(ScreenManager):
         self.current = firstpage
 
     def bluetoothBasedDisplayManager(self):
+        popup("Testr", "EADSDCJASKDFJfasd asdf asdf asdf asdf asdf asdf asdfasd fsa df asdasdf asdf asdf")
         device_name = self.handleBluetoothID()              # get entered bluetooth ID if correct, else None
         log("ScreenDisplayController.bluetoothBasedDisplayManager", "device name passed from handler: " + device_name)
         if not device_name:                                 # if entered bluetooth ID is bad
@@ -63,7 +77,7 @@ class ScreenDisplayController(ScreenManager):
         App.get_running_app().startBluetoothAdapter()
         if self.ids.idbox.text.replace(" ", "") == "":                              # if input box with spaces removed is empty
             log("ScreenDisplayController.handleBluetoothID", "Bluetooth ID blank")
-            popup("Bluetooth ID Entry Error", "ID input is blank, please input a name...")
+            popup("Bluetooth ID Entry Error", "ID input is blank, please input a name.")
 
         else:                                                             # if Bluetooth id entry has a name input
             log("ScreenDisplayController.handleBluetoothID", "Checking paired list for " + self.ids.idbox.text)
@@ -73,7 +87,7 @@ class ScreenDisplayController(ScreenManager):
 
             else:                                                         # if that name is not found
                 log("ScreenDisplayController.handleBluetoothID", "Bluetooth ID is not on the paired list, displaying message")
-                popup("Bluetooth ID Entry Error", "Bluetooth ID " + self.ids.idbox.text + " is not on the list.")
+                popup("Bluetooth ID Entry Error", "Bluetooth device with ID " + self.ids.idbox.text + " is not paired with the phone.")
 
         return None
 
