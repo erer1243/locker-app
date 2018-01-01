@@ -73,14 +73,15 @@ class ScreenDisplayController(ScreenManager):
         app = App.get_running_app()
 
     def handleBluetoothID(self, ID):
-        App.get_running_app().startBluetoothAdapter()
+        app = App.get_running_app()
+        app.startBluetoothAdapter()
         if ID.replace(" ", "") == "":                 # if input box with spaces removed is empty
             log("ScreenDisplayController.handleBluetoothID", "Bluetooth ID blank")
             popup("Bluetooth ID Entry Error", "ID input is blank, please input a name.")
 
         else:                                                             # if Bluetooth id entry has a name input
             log("ScreenDisplayController.handleBluetoothID", "Checking paired list for " + ID)
-            if App.get_running_app().checkForLocker(ID): # if that name is found
+            if app.checkForLocker(ID): # if that name is found
                 log("ScreenDisplayController.handleBluetoothID", "Bluetooth ID is on the paired list")
                 return True
 
