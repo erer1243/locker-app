@@ -65,30 +65,30 @@ class ScreenDisplayController(ScreenManager):
         super().__init__(**kwargs)
         self.current = firstpage
 
-    def bluetoothBasedDisplayManager(self):
-        device_name = self.handleBluetoothID()              # get entered bluetooth ID if correct, else None
-        log("ScreenDisplayController.bluetoothBasedDisplayManager", "device name passed from handler: " + str(device_name))
-        if not device_name:                                 # if entered bluetooth ID is bad
-            return                                              # do nothing
+    def bluetoothBasedDisplayManager(self, ID):
+        name_good = self.handleBluetoothID(ID) # get entered bluetooth ID if correct, else None
+        log("ScreenDisplayController.bluetoothBasedDisplayManager", "device name passed from handler: " + ID)
+        if not name_good:                    # if entered bluetooth ID is bad
+            return                                 # do nothing
         app = App.get_running_app()
 
-    def handleBluetoothID(self):
+    def handleBluetoothID(self, ID):
         App.get_running_app().startBluetoothAdapter()
-        if self.ids['idbox'].text.replace(" ", "") == "":                              # if input box with spaces removed is empty
+        if ID.replace(" ", "") == "":                 # if input box with spaces removed is empty
             log("ScreenDisplayController.handleBluetoothID", "Bluetooth ID blank")
             popup("Bluetooth ID Entry Error", "ID input is blank, please input a name.")
 
         else:                                                             # if Bluetooth id entry has a name input
-            log("ScreenDisplayController.handleBluetoothID", "Checking paired list for " + self.ids.idbox.text)
-            if App.get_running_app().checkForLocker(self.ids.idbox.text): # if that name is found
+            log("ScreenDisplayController.handleBluetoothID", "Checking paired list for " + ID)
+            if App.get_running_app().checkForLocker(ID): # if that name is found
                 log("ScreenDisplayController.handleBluetoothID", "Bluetooth ID is on the paired list")
-                return self.ids.idbox.text
+                return True
 
             else:                                                         # if that name is not found
                 log("ScreenDisplayController.handleBluetoothID", "Bluetooth ID is not on the paired list, displaying message")
-                popup("Bluetooth ID Entry Error", "Bluetooth device with ID " + self.ids.idbox.text + " is not paired with the phone.")
+                popup("Bluetooth ID Entry Error", "Bluetooth device with ID \"" + ID + "\" is not paired with the phone.")
 
-        return None
+        return False
 
 class MainApp(App):
     # get bluetooth default adapter
