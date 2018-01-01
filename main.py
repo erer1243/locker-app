@@ -37,32 +37,13 @@ def error():
     ErrorMain(str(sys.exc_info())).run()
 
 class ScreenDisplayController(ScreenManager):
-    def returnToNameEntry(self, btn):
-        self.current = "name_entry"
     def bluetoothBasedDisplayManager(self):
         device_name = self.handleBluetoothID()              # get entered bluetooth ID if correct, else None
         log("ScreenDisplayController.bluetoothBasedDisplayManager", "device name passed from handler: " + device_name)
         if not device_name:                                 # if entered bluetooth ID is bad
             return                                              # do nothing
         app = App.get_running_app()
-        log("ScreenDisplayController.bluetoothBasedDisplayManager", "Creating bluetooth socket")
-        socket = app.createLockerSocket(device_name)
-        log("ScreenDisplayController.bluetoothBasedDisplayManager", "Got socket")
-        try:
-            socket.connect()
-        except:
-            log("ScreenDisplayController.bluetoothBasedDisplayManager", "Error connecting to socket: " + str(sys.exc_info()))
-        log("ScreenDisplayController.bluetoothBasedDisplayManager", "Connecting to socket")
-        log("ScreenDisplayController.bluetoothBasedDisplayManager", "isconnected: " + str(socket.isConnected()))
-        while(True):
-            pass
-        rstream = socket.getInputStream()
-        sstream = socket.getOutputStream()
 
-        log("ScreenDisplayController.bluetoothBasedDisplayManager", str(type(rstream)))
-        log("ScreenDisplayController.bluetoothBasedDisplayManager", str(type(sstream)))
-        sstream.write("test :O\n")
-        sstream.flush()
     header_red = False
     not_on_list_shown = False
     def handleBluetoothID(self):
@@ -104,23 +85,17 @@ class ScreenDisplayController(ScreenManager):
         return None
 
 class MainApp(App):
-    UUIDString = "00001101-0000-1000-8000-00805F9B34FB"
-    def createLockerSocket(self, name):
-        log("MainApp.createLockerSocket", "creating locker socket from name " + name)
-        for device in self.paired_devices:
-            log("MainApp.createLockerSocket", "Comparting " + name + " to " + device.getName())
-            if device.getName() == name:
-                log("MainApp.createLockerSocket", "it's a match!")
-                socket = device.createRfcommSocketToServiceRecord(UUID.fromString(self.UUIDString))
-                log("MainApp.createLockerSocket", "Created socket")
-                return socket
-        log("MainApp.createLockerSocket", "could not create socket")
-        return None
+    # UUIDString = "00001101-0000-1000-8000-00805F9B34FB" # generic primary access, not adafruit specific
+    # UUIDString = "6E400001-B5A3-F393-E0A9-E50E24DCCA9E" # generic uart from adafruit site
+    UUIDString = "6E400002-B5A3-F393-E0A9-E50E24DCCA9E" # TX uart from adafruit site
+    # UUIDString = "6E400003-B5A3-F393-E0A9-E50E24DCCA9E" # RX uart from adafruit site
+
     def checkForLocker(self, name):
         for device in self.paired_devices:
             if device.getName() == name:
                 return True
         return False
+
     def startBluetoothAdapter(self):
         # enable bluetooth if not already
         if not self.bluetooth_adapter.isEnabled():
@@ -129,6 +104,7 @@ class MainApp(App):
         # wait for state to be STATE_ON
         while(self.bluetooth_adapter.getState() != 12): # 12 is constant for STATE_ON
             pass
+
     def getBluetoothInfo(self):
         self.startBluetoothAdapter()
         # get paired devices from bluetoothadapter
@@ -140,6 +116,7 @@ class MainApp(App):
             return False
         log("MainApp.getBluetoothInfo", "Phone has paired devices")
         return True
+
     def build(self):
         # get bluetooth default adapter
         # assumes device can use bluetooth!
