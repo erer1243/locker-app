@@ -210,7 +210,7 @@ class AppManager():
 # when app is run directly
 if __name__ == "__main__":
     try:
-        CustomGattCallback = autoclass('BluetoothGattCallback')
+        CustomGattCallback = autoclass('lockerapp.BluetoothGattCallback')
     except:
         error()
     # AppManager()
