@@ -105,7 +105,6 @@ class MainApp(App):
     # get bluetooth default adapter
     # assumes device can use bluetooth!
     bluetooth_adapter = BluetoothAdapter.getDefaultAdapter()
-    bluetooth_gatt_callback = CustomGattCallback()
 
     # UUIDString = "00001101-0000-1000-8000-00805F9B34FB" # generic primary access, not adafruit specific
     uart_service_uuid = UUID.fromString("6E400001-B5A3-F393-E0A9-E50E24DCCA9E") # generic uart from adafruit site
@@ -113,27 +112,16 @@ class MainApp(App):
     rx_uuid = UUID.fromString("6E400003-B5A3-F393-E0A9-E50E24DCCA9E") # RX uart from adafruit site
 
     def connectToDevice(self):
+        self.bluetooth_gatt_callback = CustomGattCallback()
         def fail():
             popup("Bluetooth Connection Error", "Could not connect to \'" + self.device.getName() + "\', make sure you are close enough to it and it is powered on.")
-        # we're working without a callback class here
-        # have to just time stuff and check if there's a connection
-        log("MainApp.connectToDevice", "Trying to connect to device")
         gatt = self.device.connectGatt(None, True, self.bluetooth_gatt_callback)
+        log("MainApp.connectToDevice", "Trying to connect to device")
+        while(True):
+            pass
         log("MainApp.connectToDevice", "Attempting to get uart service")
         connected = False
-        for _ in range(0, 10):
-            sleep(1)
-            uart_service = gatt.getService(self.uart_service_uuid)
-            if uart_service:
-                log("MainApp.connectToDevice", "UART service found!")
-                connected = True
-                break
-        if not connected:
-            log("MainApp.connectToDevice", "UART service NOT found!")
-            gatt.disconnect()
-            fail()
-            return False
-        return True
+        
 
     def checkForLocker(self, name):
         for device in self.paired_devices:
