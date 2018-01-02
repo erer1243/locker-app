@@ -10,7 +10,7 @@ os.environ['JAVA_HOME'] = '/usr/lib/jvm/java-8-openjdk-amd64'
 from jnius import autoclass
 # get android bluetooth classes
 BluetoothAdapter = autoclass('android.bluetooth.BluetoothAdapter')
-BluetoothGattCallback = autoclass('android.bluetooth.BluetoothGattCallback')
+BluetoothGattCallback = autoclass('lockerapp.BluetoothGattCallback')
 UUID = autoclass('java.util.UUID')
 # BluetoothDevice = autoclass('android.bluetooth.BluetoothDevice')
 # BluetoothGatt = autoclass('android.bluetooth.BluetoothGatt')
@@ -209,8 +209,4 @@ class AppManager():
 
 # when app is run directly
 if __name__ == "__main__":
-    try:
-        CustomGattCallback = autoclass('lockerapp.BluetoothGattCallback')
-    except:
-        error()
-    # AppManager()
+    AppManager()
