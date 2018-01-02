@@ -11,7 +11,9 @@ from jnius import autoclass
 # get android bluetooth classes
 BluetoothAdapter = autoclass('android.bluetooth.BluetoothAdapter')
 BluetoothGattCallback = autoclass('lockerapp.BluetoothGattCallback')
+CustomGattCallback = autoclass('lockerapp.CustomGattCallback')
 UUID = autoclass('java.util.UUID')
+
 # BluetoothDevice = autoclass('android.bluetooth.BluetoothDevice')
 # BluetoothGatt = autoclass('android.bluetooth.BluetoothGatt')
 
@@ -103,7 +105,7 @@ class MainApp(App):
     # get bluetooth default adapter
     # assumes device can use bluetooth!
     bluetooth_adapter = BluetoothAdapter.getDefaultAdapter()
-    bluetooth_gatt_callback = BluetoothGattCallback()
+    bluetooth_gatt_callback = CustomGattCallback()
 
     # UUIDString = "00001101-0000-1000-8000-00805F9B34FB" # generic primary access, not adafruit specific
     uart_service_uuid = UUID.fromString("6E400001-B5A3-F393-E0A9-E50E24DCCA9E") # generic uart from adafruit site
