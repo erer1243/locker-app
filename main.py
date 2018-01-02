@@ -11,7 +11,7 @@ from jnius import autoclass
 # get android bluetooth classes
 BluetoothAdapter = autoclass('android.bluetooth.BluetoothAdapter')
 BluetoothGattCallback = autoclass('lockerapp.BluetoothGattCallback')
-CustomGattCallback = autoclass('lockerapp.CustomGattCallback')
+BTManager = autoclass('lockerapp.BTManager')
 UUID = autoclass('java.util.UUID')
 
 # BluetoothDevice = autoclass('android.bluetooth.BluetoothDevice')
@@ -112,16 +112,34 @@ class MainApp(App):
     rx_uuid = UUID.fromString("6E400003-B5A3-F393-E0A9-E50E24DCCA9E") # RX uart from adafruit site
 
     def connectToDevice(self):
-        self.bluetooth_gatt_callback = CustomGattCallback()
         def fail():
             popup("Bluetooth Connection Error", "Could not connect to \'" + self.device.getName() + "\', make sure you are close enough to it and it is powered on.")
-        gatt = self.device.connectGatt(None, True, self.bluetooth_gatt_callback)
-        log("MainApp.connectToDevice", "Trying to connect to device")
-        while(True):
-            pass
-        log("MainApp.connectToDevice", "Attempting to get uart service")
-        connected = False
-        
+
+        self.btmanager = BTManager(self.uart_service_uuid, self.tx_uuid, self.rx_uuid)
+        gatt = self.device.connectGatt(None, True, self.btmanager)
+        # gatt.discoverServices()
+        ever_connected = False
+
+        log("MainApp.connectToDevice", "Trying to connect to device.")
+        for _ in range(0, 5):
+            oldState = self.btmanager.getConnectionState()
+            sleep(2)
+            currentState = self.btmanager.getConnectionState()
+
+            if not currentState == oldState:
+                if currentState == 2:
+                    log("MainApp.connectToDevice", "Device connected!")
+                    ever_connected = True
+                elif currentState == 0:
+                    log("MainApp.connectToDevice", "Device disconnected!")
+                else:
+                    log("MainApp.connectToDevice", "Picked up on some other state change.")
+
+        if not currentState == 0:
+            log("MainApp.connectToDevice", "Manually disconnecting from device.")
+            gatt.disconnect()
+
+        return ever_connected
 
     def checkForLocker(self, name):
         for device in self.paired_devices:
