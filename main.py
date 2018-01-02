@@ -209,4 +209,8 @@ class AppManager():
 
 # when app is run directly
 if __name__ == "__main__":
-    AppManager()
+    try:
+        CustomGattCallback = autoclass('BluetoothGattCallback')
+    except:
+        error()
+    # AppManager()
