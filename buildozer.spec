@@ -132,11 +132,11 @@ android.ndk_path = ../crystax-ndk
 # their classes. Don't add jars that you do not need, since extra jars can slow
 # down the build process. Allows wildcards matching, for example:
 # OUYA-ODK/libs/*.jar
-android.add_jars = java/BluetoothGattCallback.jar
+#android.add_jars = java/BluetoothGattCallback.jar
 
 # (list) List of Java files to add to the android project (can be java or a
 # directory containing the files)
-#android.add_src =
+android.add_src = BluetoothGattCallback.java
 
 # (list) Android AAR archives to add (currently works only with sdl2_gradle
 # bootstrap)
