@@ -4,4 +4,6 @@ log
 __pycache__/
 backup.py
 *.java
+*.class
+*.jar
 !BluetoothGattCallback.java
