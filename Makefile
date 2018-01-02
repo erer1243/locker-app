@@ -1,6 +1,8 @@
+# compile and send to phone
 all:
 	adb kill-server
 	buildozer android debug deploy run
+# log only from app
 log: all
 	adb kill-server
 	adb logcat | grep locker-controller
