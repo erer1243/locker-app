@@ -8,5 +8,5 @@ log: all
 manual_log: all
 	adb kill-server
 	echo "Enter to begin logging"
-	read
+	read x
 	adb logcat | grep locker-controller
