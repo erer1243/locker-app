@@ -1,7 +1,7 @@
 # compile and send to phone
 all:
 	adb kill-server
-	buildozer android debug deploy run
+	buildozer android debug deploy run | sed 's/\\n/\n/g'
 # log only from app
 log: all
 	adb kill-server
