@@ -7,6 +7,6 @@ log: all
 # to give opportunity to begin logging manually within make script
 manual_log: all
 	adb kill-server
-	echo "Enter to begin logging"
-	read x
+	@echo "Enter to begin logging"
+	@read x
 	adb logcat | grep locker-controller
