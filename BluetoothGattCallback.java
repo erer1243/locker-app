@@ -10,7 +10,8 @@ import static java.lang.System.*;
 
 class CustomGattCallback extends BluetoothGattCallback {
   private static final int STATE_DISCONNECTED = 0;
-  private static final int STATE_CONNECTED = 1;
+  private static final int STATE_CONNECTING = 1;
+  private static final int STATE_CONNECTED = 2;
   private int connection_state;
 
   public CustomGattCallback(){
@@ -22,6 +23,15 @@ class CustomGattCallback extends BluetoothGattCallback {
   @Override
   public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState){
     log("onStateChange", "Status: " + str(status) + " newState: " + str(newState));
+    // if(newState == 0){
+    //   connection_state = STATE_DISCONNECTED;
+    //   log("onStateChange", "Bluetooth disconnected")
+    // }
+
+  }
+
+  public int getConnectionState(){
+    return connection_state;
   }
 
   // helper methods/macros here out
