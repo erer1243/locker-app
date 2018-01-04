@@ -76,7 +76,11 @@ class ScreenDisplayController(ScreenManager):
             return       # give control back to kivy engine
         app = App.get_running_app() # get instance of app class from kivy engine
         log("ScreenDisplayController.bluetoothBasedDisplayManager", "Trying to connect to device.")
-        log("ScreenDisplayController.bluetoothBasedDisplayManager", "Phone " + ("DID" if app.connectToDevice() else "DID NOT") + " connect")
+        status, gatt = app.connectToDevice()
+        log("ScreenDisplayController.bluetoothBasedDisplayManager", str(status) + " " + str(gatt))
+        if not status:
+            return
+        log("ScreenDisplayController.bluetoothBasedDisplayManager", "Connection success")
 
     # method to run checks on the user-input bluetooth device name that identifies the locker
     def handleBluetoothID(self, ID):
@@ -114,27 +118,36 @@ class MainApp(App):
     rx_uuid = UUID.fromString("6E400003-B5A3-F393-E0A9-E50E24DCCA9E") # RX uart
 
     def connectToDevice(self):
-        def fail():
-            popup("Bluetooth Connection Error", "Could not connect to \'" + self.device.getName() + "\', make sure you are close enough to it and it is powered on.")
-
         self.btmanager = BTManager(self.uart_service_uuid, self.tx_uuid, self.rx_uuid) # create callback object
         gatt = self.device.connectGatt(None, True, self.btmanager) # create bluetooth interactions gatt identifier
         log("MainApp.connectToDevice", "Trying to connect to device.")
 
-        t_end = time.time() + 10
-        while time.time() < t_end: # run this while loop for 10 seconds - enough time to connect to bluetooth surely
-            if self.btmanager.getConnectionState() == 2: # if btmanager connection state is connected (2)
-                log("MainApp.connectToDevice", "Devices shows connected!")
-                break # break out of the loop and continue
+        def waitForConnect(wait):
+            t_end = time.time() + wait
+            while time.time() < t_end: # run this while loop for [wait] seconds
+                if self.btmanager.getConnectionState() == 2: # if btmanager connection state equals connected (2)
+                    log("MainApp.connectToDevice", "Device connected.")
+                    break # break out of the loop and continue
+        def waitForUart(wait):
+            t_end = time.time() + wait
+            while time.time() < t_end:
+                if self.btmanager.getUartStatus():
+                    log("MainApp.connectToDevice", "UART discovered and ready.")
+                    break
 
-        time.sleep(3)
+        waitForConnect(10) # allow up to 10 sec to connect to BT device
+        if self.btmanager.getConnectionState() != 2:
+            popup("No Connection Made", "A connection with " + self.device.getName() + " could not be made. Make sure you are close enough and it is powered on.")
+            gatt.close()
+            return False, None
 
-        # if not currentState == 0:
-        #     log("MainApp.connectToDevice", "Manually disconnecting from device.")
-        log("MainApp.connectToDevice", "Closing gatt")
-        gatt.close()
+        waitForUart(5) # allow up to 5 seconds to check if it is uart compatible
+        if not self.btmanager.getUartStatus():
+            popup("No UART Ability", "A connection with " + self.device.getName() + " was made but the device does not appear to support Adafruit UART communicatios.")
+            gatt.close()
+            return False, None
 
-        return self.btmanager.getEverConnected()
+        return True, gatt
 
     def checkForLocker(self, name):
         for device in self.paired_devices:
