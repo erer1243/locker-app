@@ -8,20 +8,23 @@ import android.util.Log;
 import java.util.UUID;
 
 class BTManager extends BluetoothGattCallback {
+  // static constants
   private static final int STATE_DISCONNECTED = 0;
   private static final int STATE_CONNECTING = 1;
   private static final int STATE_CONNECTED = 2;
   private static final int STATE_DISCONNECTING = 3;
-
+  // functional constants initialized later
   private BluetoothGattCharacteristic tx_char;
   private BluetoothGattCharacteristic rx_char;
   private UUID tx;
   private UUID rx;
   private UUID uart;
-
+  // for keeping track of status between python and java
   private int connection_state = STATE_DISCONNECTED;
   private boolean ever_connected = false;
   private boolean uart_ready = false;
+  //for passing information between callbacks
+  private String written_value;
 
   public BTManager(UUID uart_uuid, UUID tx_uuid, UUID rx_uuid){
     log("BTManager", "Initialized CustomGattCallback");
@@ -44,6 +47,17 @@ class BTManager extends BluetoothGattCallback {
     }
   }
 
+  @Override
+  public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status){
+    if(characterisitc.getValue() != written_value){
+      written_value = "__FAIL";
+      gatt.abortReliableWrite();
+    }
+    else{
+      gatt.executeReliableWrite();
+    }
+  }
+
   public void onServicesDiscovered(BluetoothGatt gatt, int status){
     log("onServicesDiscovered", "Service discovered. Status: " + Integer.toString(status));
 
@@ -57,7 +71,7 @@ class BTManager extends BluetoothGattCallback {
         if(uart_service.getCharacteristic(tx) != null){
           log("onServicesDiscovered", "TX characteristic found. This is a compatible device.");
           tx_char = uart_service.getCharacteristic(tx);
-          rx_char = uart_service.getCharacteristic(rx);
+          // rx_char = uart_service.getCharacteristic(rx);
           uart_ready = true;
         }
       }
@@ -75,6 +89,19 @@ class BTManager extends BluetoothGattCallback {
     log("onDisconnect", "Bluetooth device disconnected.");
     uart_ready = false;
     connection_state = STATE_DISCONNECTED;
+  }
+
+  public boolean send(BluetoothGatt gatt, String message){
+    if(!gatt.beginReliableWrite()){
+      return false;
+    }
+    written_value = message;
+    tx_char.setValue(message);
+    gatt.writeCharacteristic(tx_char);
+    if(written_value == "__FAIL"){
+      return false;
+    }
+    return true;
   }
 
   // general helper methods/macros here out

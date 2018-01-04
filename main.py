@@ -81,6 +81,7 @@ class ScreenDisplayController(ScreenManager):
         if not status:
             return
         log("ScreenDisplayController.bluetoothBasedDisplayManager", "Connection success")
+        self.current = "bt_paired"
 
     # method to run checks on the user-input bluetooth device name that identifies the locker
     def handleBluetoothID(self, ID):
@@ -116,6 +117,9 @@ class MainApp(App):
     uart_service_uuid = UUID.fromString("6E400001-B5A3-F393-E0A9-E50E24DCCA9E") # generic uart
     tx_uuid = UUID.fromString("6E400002-B5A3-F393-E0A9-E50E24DCCA9E") # TX uart
     rx_uuid = UUID.fromString("6E400003-B5A3-F393-E0A9-E50E24DCCA9E") # RX uart
+
+    def send(string):
+        
 
     def connectToDevice(self):
         self.btmanager = BTManager(self.uart_service_uuid, self.tx_uuid, self.rx_uuid) # create callback object
