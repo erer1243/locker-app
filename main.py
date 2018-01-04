@@ -1,29 +1,26 @@
 '''python stuff'''
-import sys, time
-from textwrap import wrap
+import sys, time # sys for sys.exit and error info. time for timed connection attempts
+from textwrap import wrap # textwrap for text wrapping... mind blown
 
 
 '''java stuff'''
 import os
-os.environ['JAVA_HOME'] = '/usr/lib/jvm/java-8-openjdk-amd64'
-from jnius import autoclass
+os.environ['JAVA_HOME'] = '/usr/lib/jvm/java-8-openjdk-amd64' # where java compiler is
+
+from jnius import autoclass # jnius allows java objects to exist and be manipulated in python space
 # get android bluetooth classes
-BluetoothAdapter = autoclass('android.bluetooth.BluetoothAdapter')
-BluetoothGattCallback = autoclass('lockerapp.BluetoothGattCallback')
-BTManager = autoclass('lockerapp.BTManager')
-UUID = autoclass('java.util.UUID')
+BluetoothAdapter = autoclass('android.bluetooth.BluetoothAdapter') # class representing actual bluetooth antenna and drivers
+BTManager = autoclass('lockerapp.BTManager') # custom callback class to respond to bluetooth events
+UUID = autoclass('java.util.UUID') # to generate UUID objects from string, see UUID info later on
 
-# BluetoothDevice = autoclass('android.bluetooth.BluetoothDevice')
-# BluetoothGatt = autoclass('android.bluetooth.BluetoothGatt')
-
-logd = autoclass('android.util.Log').d
-def log(tag, message):
-    logd("\nlocker-controller." + tag, message+'\n')
+logd = autoclass('android.util.Log').d # android built-in debugging/logging method
+def log(tag, message): # log takes a tag (where in the program the log is from) and a message
+    logd("\nlocker-controller." + tag, message+'\n') # adds locker-controller to all tags to identify specific app logs
 
 
 '''kivy stuff'''
-import kivy
-kivy.require('1.10.0')
+import kivy # kivy is the GUI engine, everything below are kivy-specific objects
+kivy.require('1.10.0') # make sure kivy uses right version of objects
 # systems
 from kivy.app import App
 from kivy.lang import Builder
@@ -37,11 +34,13 @@ from kivy.uix.gridlayout import GridLayout
 # display simple traceback page
 # to be used in event of total failure
 def error():
-    from errorpage import ErrorMain
-    msg = str(sys.exc_info())
-    log("error", msg)
-    ErrorMain(msg).run()
+    from errorpage import ErrorMain # import errormain from other file
+    msg = str(sys.exc_info()) # get error message from sys class
+    log("error", msg) # log that error info
+    ErrorMain(msg).run() # run a traceback page with that info
 
+# display simple popup with a title, message, and close button
+# to be used in simple, nonfatal errors or warnings
 def popup(title, message):
     log("popup", "Showing popup for message: " + message)
     popup = Popup()
@@ -63,67 +62,71 @@ def popup(title, message):
     popup.content = pgrid
     popup.open()
 
+# create ScreenManager for making app navigatable
 class ScreenDisplayController(ScreenManager):
     def __init__(self, firstpage, **kwargs):
         super().__init__(**kwargs)
-        self.current = firstpage
+        self.current = firstpage # allow the first shown page to be easily definable
 
-    def on_resume(self):
-        log("ScreenDisplayController.on_resume", "Device resuming, re-attaining paired bluetooth devices")
-        App.get_running_app().getBluetoothInfo()
-
+    # method that will govern the app as soon as an attempt to connect to a bluetooth device is made
     def bluetoothBasedDisplayManager(self, ID):
-        name_good = self.handleBluetoothID(ID) # get entered bluetooth ID if correct, else None
+        name_good = self.handleBluetoothID(ID) # get whether or not the user-entered bluetooth device name is proper
         log("ScreenDisplayController.bluetoothBasedDisplayManager", "device name passed from handler: " + ID)
-        if not name_good:                    # if entered bluetooth ID is bad
-            return                                 # do nothing
-        app = App.get_running_app()
+        if not name_good:# if entered bluetooth ID is bad
+            return       # give control back to kivy engine
+        app = App.get_running_app() # get instance of app class from kivy engine
         log("ScreenDisplayController.bluetoothBasedDisplayManager", "Trying to connect to device.")
         log("ScreenDisplayController.bluetoothBasedDisplayManager", "Phone " + ("DID" if app.connectToDevice() else "DID NOT") + " connect")
 
+    # method to run checks on the user-input bluetooth device name that identifies the locker
     def handleBluetoothID(self, ID):
-        app = App.get_running_app()
-        app.startBluetoothAdapter()
-        if ID.replace(" ", "") == "":                 # if input box with spaces removed is empty
+        app = App.get_running_app() # get instance of app from kivy engine
+        app.startBluetoothAdapter() # ensure bluetooth is on
+
+        if ID.replace(" ", "") == "": # make sure user didn't enter just spaces
             log("ScreenDisplayController.handleBluetoothID", "Bluetooth ID blank")
             popup("Bluetooth ID Entry Error", "ID input is blank, please input a name.")
 
-        else:                                                             # if Bluetooth id entry has a name input
+        else: # if Bluetooth id entry has at least some letters
             log("ScreenDisplayController.handleBluetoothID", "Checking paired list for " + ID)
-            if app.checkForLocker(ID): # if that name is found
+            if app.checkForLocker(ID): # if that name is found among the BT devices paired with the phone
                 log("ScreenDisplayController.handleBluetoothID", "Bluetooth ID is on the paired list")
                 return True
 
-            else:                                                         # if that name is not found
+            else: # if the name is not found on the paired list
                 log("ScreenDisplayController.handleBluetoothID", "Bluetooth ID is not on the paired list, displaying message")
                 popup("Bluetooth ID Entry Error", "Bluetooth device with ID \"" + ID + "\" is not paired with the phone.")
 
-        return False
+        return False # return false everywhere it's not true, ie every wrong situation
 
 class MainApp(App):
-    # get bluetooth default adapter
-    # assumes device can use bluetooth!
+
+    # get bluetooth device object. assumes device can use bluetooth, will fail if it cannot!
     bluetooth_adapter = BluetoothAdapter.getDefaultAdapter()
 
-    # UUIDString = "00001101-0000-1000-8000-00805F9B34FB" # generic primary access, not adafruit specific
-    uart_service_uuid = UUID.fromString("6E400001-B5A3-F393-E0A9-E50E24DCCA9E") # generic uart from adafruit site
-    tx_uuid = UUID.fromString("6E400002-B5A3-F393-E0A9-E50E24DCCA9E") # TX uart from adafruit site
-    rx_uuid = UUID.fromString("6E400003-B5A3-F393-E0A9-E50E24DCCA9E") # RX uart from adafruit site
+    ''' Bluetooth connection points are defined by UUIDs specified by the manufacturer
+        of the device. All of these UUIDs were sourced from one of Adafruit's Bluefruit LE
+        information pages:
+        https://learn.adafruit.com/getting-started-with-the-nrf8001-bluefruit-le-breakout/adding-app-support
+    '''
+    uart_service_uuid = UUID.fromString("6E400001-B5A3-F393-E0A9-E50E24DCCA9E") # generic uart
+    tx_uuid = UUID.fromString("6E400002-B5A3-F393-E0A9-E50E24DCCA9E") # TX uart
+    rx_uuid = UUID.fromString("6E400003-B5A3-F393-E0A9-E50E24DCCA9E") # RX uart
 
     def connectToDevice(self):
         def fail():
             popup("Bluetooth Connection Error", "Could not connect to \'" + self.device.getName() + "\', make sure you are close enough to it and it is powered on.")
 
-        self.btmanager = BTManager(self.uart_service_uuid, self.tx_uuid, self.rx_uuid)
-        gatt = self.device.connectGatt(None, True, self.btmanager)
+        self.btmanager = BTManager(self.uart_service_uuid, self.tx_uuid, self.rx_uuid) # create callback object
+        gatt = self.device.connectGatt(None, True, self.btmanager) # create bluetooth interactions gatt identifier
         log("MainApp.connectToDevice", "Trying to connect to device.")
 
-        t_end = time.time() + 10
-        while time.time() < t_end:
-            if self.btmanager.getConnectionState() == 2:
+        t_end = time.time() + 15
+        while time.time() < t_end: # run this while loop for 15 seconds - enough time to connect to bluetooth surely
+            if self.btmanager.getConnectionState() == 2: # if btmanager connection state is connected (2)
                 log("MainApp.connectToDevice", "Devices shows connected!")
-                break
-        
+                break # break out of the loop and continue
+
         time.sleep(3)
 
         # if not currentState == 0:
@@ -146,67 +149,71 @@ class MainApp(App):
         if not self.bluetooth_adapter.isEnabled():
             log("MainApp.startBluetoothAdapter", "Enabling bluetooth adapter")
             self.bluetooth_adapter.enable()
-        # wait for state to be STATE_ON
+        # wait for state to be STATE_ON, aka ready for use
         while(self.bluetooth_adapter.getState() != 12): # 12 is constant for STATE_ON
-            pass
+            pass # do nothing while it's not ready
 
+    # initialize the bluetooth adapter and update paired_devices property
     def initBluetoothInfo(self):
-        self.startBluetoothAdapter()
-        # get paired devices from bluetoothadapter
+        self.startBluetoothAdapter() # ensure bluetooth is on
+
         log("MainApp.getBluetoothInfo", "Getting paired devices")
-        self.paired_devices = self.bluetooth_adapter.getBondedDevices().toArray()
-        # if paired devices is empty
-        if not self.paired_devices:
+        self.paired_devices = self.bluetooth_adapter.getBondedDevices().toArray() # get array of paired BT devices
+
+        if not self.paired_devices: # if paired devices is empty
             log("MainApp.getBluetoothInfo", "No paired devices found, failing!")
             return False
+
         log("MainApp.getBluetoothInfo", "Phone has paired devices")
         return True
 
+    # update paired_devices AND switch screens if necessary (ie no paired devices)
     def getBluetoothInfo(self):
         def correctScreen(name):
             if not self.SDC.current == name:
-                self.SDC.current = name
-        self.startBluetoothAdapter()
+                self.SDC.current = name # set current screen to param if it's not already
+
+        self.startBluetoothAdapter() # ensure bluetooth is turned on
         # get paired devices from bluetoothadapter
         log("MainApp.getBluetoothInfo", "Getting paired devices")
-        self.paired_devices = self.bluetooth_adapter.getBondedDevices().toArray()
-        # if paired devices is empty
-        if not self.paired_devices:
-            correctScreen("no_paired_devices_failure")
+        self.paired_devices = self.bluetooth_adapter.getBondedDevices().toArray() # get array of paired BT devices
+
+        if not self.paired_devices: # if no devices paired to phone
+            correctScreen("no_paired_devices_failure") # switch screen to fail screen
             log("MainApp.getBluetoothInfo", "No paired devices found, failing!")
             return False
-        correctScreen("name_entry")
+
+        correctScreen("name_entry") # switch screen to proper, non-error screen
         log("MainApp.getBluetoothInfo", "Phone has paired devices")
         return True
 
+    # necessary kivy method that is run when the app is started
     def build(self):
-        Builder.load_file('main.kv')
+        Builder.load_file('main.kv') # load stylesheet in kvlang
 
-        if not self.initBluetoothInfo():
+        if not self.initBluetoothInfo(): # if there are no devices paired with the phone
             log("MainApp.build", "Loading first screen no_paired_devices_failure")
-            self.SDC = ScreenDisplayController("no_paired_devices_failure")
+            self.SDC = ScreenDisplayController("no_paired_devices_failure") # create screenmanager with failure screen
         else:
             log("MainApp.build", "Loading first screen name_entry")
-            self.SDC = ScreenDisplayController("name_entry")
-        self.SDC.transition = NoTransition()
-        return self.SDC
+            self.SDC = ScreenDisplayController("name_entry") # create screenmanager with proper screen
 
-class AppManager():
-    def __init__(self):
-        try:
-            self.app = MainApp()
-        except:
-            error()
-
-        # try running the app, this is where it will most likely fail
-        try:
-            self.app.run()
-        except SystemExit: # if sys.exit is called, allow it to finish and quit
-            sys.exit()
-        except: # otherwise stop the app and show error
-            self.app.stop()
-            error()
+        self.SDC.transition = NoTransition() # the default transition is wonky. Not trying to be pretty, but also not ugly
+        return self.SDC # return the screenmanager for kivy engine to pick up and use
 
 # when app is run directly
 if __name__ == "__main__":
-    AppManager()
+    # lots of sweeping try/excepts used for easy error finding
+    try:
+        self.app = MainApp() # try instancing the app
+    except:
+        error() # if it fails show error screen
+
+    # try running the app, this is where it will most likely fail
+    try:
+        self.app.run() # try running the app
+    except SystemExit: # if sys.exit is called
+        sys.exit() #allow it to finish and quit
+    except: # if it fails
+        self.app.stop() # stop the app
+        error() # show error screen
