@@ -121,8 +121,8 @@ class MainApp(App):
         gatt = self.device.connectGatt(None, True, self.btmanager) # create bluetooth interactions gatt identifier
         log("MainApp.connectToDevice", "Trying to connect to device.")
 
-        t_end = time.time() + 15
-        while time.time() < t_end: # run this while loop for 15 seconds - enough time to connect to bluetooth surely
+        t_end = time.time() + 10
+        while time.time() < t_end: # run this while loop for 10 seconds - enough time to connect to bluetooth surely
             if self.btmanager.getConnectionState() == 2: # if btmanager connection state is connected (2)
                 log("MainApp.connectToDevice", "Devices shows connected!")
                 break # break out of the loop and continue
@@ -205,15 +205,15 @@ class MainApp(App):
 if __name__ == "__main__":
     # lots of sweeping try/excepts used for easy error finding
     try:
-        self.app = MainApp() # try instancing the app
+        _app = MainApp() # try instancing the app
     except:
         error() # if it fails show error screen
 
     # try running the app, this is where it will most likely fail
     try:
-        self.app.run() # try running the app
+        _app.run() # try running the app
     except SystemExit: # if sys.exit is called
         sys.exit() #allow it to finish and quit
     except: # if it fails
-        self.app.stop() # stop the app
+        _app.stop() # stop the app
         error() # show error screen
