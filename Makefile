@@ -1,7 +1,13 @@
 # compile and send to phone
 all:
 	adb kill-server
-	buildozer android debug deploy run | sed 's/\\n/\n/g' | sed 's/\\t/\t/g'
+	# all the seds because buildozer ignores all escape characters.
+	# sed commands properly print them
+	buildozer android debug deploy run | \
+	sed 's/\\n/\n/g' | \
+	sed 's/\\t/\t/g' | \
+	sed 's/\\r/\r/g' | \
+	sed "s/'b'//g"
 # log only from app
 log: all
 	adb kill-server
