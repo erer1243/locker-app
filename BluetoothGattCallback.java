@@ -25,7 +25,7 @@ class BTManager extends BluetoothGattCallback {
   private UUID uart;
 
   public BTManager(UUID uart_uuid, UUID tx_uuid, UUID rx_uuid){
-    log("CustomGattCallback", "Initialized CustomGattCallback");
+    log("BTManager", "Initialized CustomGattCallback");
     connection_state = STATE_DISCONNECTED;
     uart = uart_uuid;
     tx = tx_uuid;
@@ -34,7 +34,7 @@ class BTManager extends BluetoothGattCallback {
 
   @Override
   public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState){
-    log("onStateChange", "Status: " + Integer.toString(status) + " newState: " + Integer.toString(newState));
+    log("onConnectionStateChange", "Status: " + Integer.toString(status) + " newState: " + Integer.toString(newState));
     switch(newState){
       case STATE_CONNECTED:
         onConnect(gatt);
@@ -61,7 +61,7 @@ class BTManager extends BluetoothGattCallback {
           tx_char = uart_service.getCharacteristic(tx);
           rx_char = uart_service.getCharacteristic(rx);
 
-          tx_char.setValue("tEsT");
+          tx_char.setValue("Test Line");
           gatt.writeCharacteristic(tx_char);
           log("onServicesDiscovered", "Test sent. Look for it on serial line.");
         }
@@ -70,14 +70,14 @@ class BTManager extends BluetoothGattCallback {
   }
 
   public void onConnect(BluetoothGatt gatt){
-    log("onStateChange", "Bluetooth connected, discovering services.");
+    log("onConnect", "Bluetooth connected, discovering services.");
     gatt.discoverServices();
     ever_connected = true;
     connection_state = STATE_CONNECTED;
   }
 
   public void onDisconnect(){
-    log("onStateChange", "Bluetooth device disconnected.");
+    log("onDisconnect", "Bluetooth device disconnected.");
     connection_state = STATE_DISCONNECTED;
   }
 
