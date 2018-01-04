@@ -59,7 +59,8 @@
             cols: 1
             TextInput:
                 id: testbox
+                text: "Test"
             Button:
-                id: sendbutton
+                on_release: app.send(testbox.text)
                 text: "send"
                 font_size: 70

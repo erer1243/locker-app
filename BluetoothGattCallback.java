@@ -23,11 +23,10 @@ class BTManager extends BluetoothGattCallback {
   private int connection_state = STATE_DISCONNECTED;
   private boolean ever_connected = false;
   private boolean uart_ready = false;
-  //for passing information between callbacks
-  private String written_value;
+  private boolean last_write_status = false;
 
   public BTManager(UUID uart_uuid, UUID tx_uuid, UUID rx_uuid){
-    log("BTManager", "Initialized CustomGattCallback");
+    log("BTManager", "Initialized BTManager");
     uart = uart_uuid;
     tx = tx_uuid;
     rx = rx_uuid;
@@ -49,12 +48,10 @@ class BTManager extends BluetoothGattCallback {
 
   @Override
   public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status){
-    if(characterisitc.getValue() != written_value){
-      written_value = "__FAIL";
-      gatt.abortReliableWrite();
-    }
-    else{
-      gatt.executeReliableWrite();
+    log("onCharacteristicWrite", "Status: " + Integer.toString(status));
+    if(status == 0){
+      log("onCharacteristicWrite", "Successful write.");
+      last_write_status = true;
     }
   }
 
@@ -71,7 +68,6 @@ class BTManager extends BluetoothGattCallback {
         if(uart_service.getCharacteristic(tx) != null){
           log("onServicesDiscovered", "TX characteristic found. This is a compatible device.");
           tx_char = uart_service.getCharacteristic(tx);
-          // rx_char = uart_service.getCharacteristic(rx);
           uart_ready = true;
         }
       }
@@ -91,20 +87,19 @@ class BTManager extends BluetoothGattCallback {
     connection_state = STATE_DISCONNECTED;
   }
 
-  public boolean send(BluetoothGatt gatt, String message){
-    if(!gatt.beginReliableWrite()){
-      return false;
-    }
-    written_value = message;
-    tx_char.setValue(message);
-    gatt.writeCharacteristic(tx_char);
-    if(written_value == "__FAIL"){
-      return false;
-    }
-    return true;
+  // general helper methods/macros here out
+  public BluetoothGattCharacteristic getTX(){
+    return tx_char;
   }
 
-  // general helper methods/macros here out
+  public boolean messageSentCorrectly(){
+    return last_write_status;
+  }
+
+  public void resetWriteStatus(){
+    last_write_status = false;
+  }
+
   public int getConnectionState(){
     return connection_state;
   }
@@ -113,11 +108,16 @@ class BTManager extends BluetoothGattCallback {
     return ever_connected;
   }
 
+  // this is necessary because doing setvalue through pyjnius defaults argument type to byte[]
+  public void setTXValue(String val){
+    tx_char.setValue(val);
+  }
+
   public boolean getUartStatus(){
     return uart_ready;
   }
 
   public void log(String tag, String message){
-    Log.d("locker-controller.BluetoothGattCallback" + tag, message);
+    Log.d("locker-controller.BTManager." + tag, message);
   }
 }
