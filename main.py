@@ -1,7 +1,6 @@
 '''python stuff'''
-import sys
+import sys, time
 from textwrap import wrap
-from time import sleep
 
 
 '''java stuff'''
@@ -80,7 +79,7 @@ class ScreenDisplayController(ScreenManager):
             return                                 # do nothing
         app = App.get_running_app()
         log("ScreenDisplayController.bluetoothBasedDisplayManager", "Trying to connect to device.")
-        log("ScreenDisplayController.bluetoothBasedDisplayManager", str(app.connectToDevice()))
+        log("ScreenDisplayController.bluetoothBasedDisplayManager", "Phone " + ("DID" if app.connectToDevice() else "DID NOT") + " connect")
 
     def handleBluetoothID(self, ID):
         app = App.get_running_app()
@@ -117,29 +116,22 @@ class MainApp(App):
 
         self.btmanager = BTManager(self.uart_service_uuid, self.tx_uuid, self.rx_uuid)
         gatt = self.device.connectGatt(None, True, self.btmanager)
-        # gatt.discoverServices()
-        ever_connected = False
-
         log("MainApp.connectToDevice", "Trying to connect to device.")
-        for _ in range(0, 5):
-            oldState = self.btmanager.getConnectionState()
-            sleep(2)
-            currentState = self.btmanager.getConnectionState()
 
-            if not currentState == oldState:
-                if currentState == 2:
-                    log("MainApp.connectToDevice", "Device connected!")
-                    ever_connected = True
-                elif currentState == 0:
-                    log("MainApp.connectToDevice", "Device disconnected!")
-                else:
-                    log("MainApp.connectToDevice", "Picked up on some other state change.")
+        t_end = time.time() + 10
+        while time.time() < t_end:
+            if self.btmanager.getConnectionState() == 2:
+                log("MainApp.connectToDevice", "Devices shows connected!")
+                break
+        
+        time.sleep(3)
 
-        if not currentState == 0:
-            log("MainApp.connectToDevice", "Manually disconnecting from device.")
-            gatt.disconnect()
+        # if not currentState == 0:
+        #     log("MainApp.connectToDevice", "Manually disconnecting from device.")
+        log("MainApp.connectToDevice", "Closing gatt")
+        gatt.close()
 
-        return ever_connected
+        return self.btmanager.getEverConnected()
 
     def checkForLocker(self, name):
         for device in self.paired_devices:
