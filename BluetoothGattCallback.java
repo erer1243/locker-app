@@ -3,12 +3,9 @@ package lockerapp;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.util.Log;
-import java.util.List;
 import java.util.UUID;
-import static java.lang.System.*;
 
 class BTManager extends BluetoothGattCallback {
   private static final int STATE_DISCONNECTED = 0;
@@ -81,6 +78,7 @@ class BTManager extends BluetoothGattCallback {
     connection_state = STATE_DISCONNECTED;
   }
 
+  // general helper methods/macros here out
   public int getConnectionState(){
     return connection_state;
   }
@@ -89,7 +87,6 @@ class BTManager extends BluetoothGattCallback {
     return ever_connected;
   }
 
-  // general helper methods/macros here out
   public void log(String tag, String message){
     Log.d("locker-controller.BluetoothGattCallback" + tag, message);
   }
