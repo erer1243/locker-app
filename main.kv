@@ -55,12 +55,34 @@
     Screen:
         name: "bt_paired"
         GridLayout:
-            rows: 2
+            rows: 3
             cols: 1
-            TextInput:
-                id: testbox
-                text: "Test"
             Button:
-                on_release: app.send(testbox.text)
-                text: "send"
+                on_release: app.send('o')
+                text: "Toggle Solenoid"
                 font_size: 70
+            Button:
+                size_hint_y: .3
+                text: "Off"
+                font_size: 50
+                on_release: app.send('L')
+            GridLayout:
+                size_hint_y: .4
+                rows: 2
+                cols: 2
+                Button:
+                    text: "White"
+                    on_release: app.send('w')
+                    font_size: 50
+                Button:
+                    text: "Red"
+                    on_release: app.send('r')
+                    font_size: 50
+                Button:
+                    text: "Green"
+                    on_release: app.send('g')
+                    font_size: 50
+                Button:
+                    text: "Blue"
+                    on_release: app.send('b')
+                    font_size: 50
